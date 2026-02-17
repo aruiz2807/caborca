@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["resources/js/*"],
+
+            "@/images": ["./resources/assets/images/*"],
+            "@/stores": ["./resources/assets/stores/*"],
+            "@/Pages": ["./resources/js/Pages/*"],
+            "@/Layouts": ["./resources/js/Layouts/*"],
+            "@/Composables": ["./resources/js/Composables/*"],
+        }
+    },
+    "exclude": ["node_modules", "public"]
+}
