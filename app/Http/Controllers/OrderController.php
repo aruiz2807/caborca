@@ -37,14 +37,33 @@ class OrderController extends Controller
     /*
     Get all orders
     */
-    public function archive()
+    public function archive(Request $request)
     {
-        $orders = Order::all();
+        $query = Order::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('vehicle_dependency')) {
+            $query->where('vehicle_dependency_id', $request->vehicle_dependency);
+        }
+
+        if ($request->filled('order_date_from')) {
+            $query->whereDate('service_requested_date', '>=', $request->order_date_from);
+        }
+
+        if ($request->filled('order_date_to')) {
+            $query->whereDate('service_requested_date', '<=', $request->order_date_to);
+        }
+
+        $orders = $query->get();
         $dependencies = Dependency::all(['id', 'name']);
 
         return Inertia::render('Orders/Archive/Index', [
             'orders' => $orders,
             'dependencies' => $dependencies,
+            'filters' => $request->only(['status', 'vehicle_dependency', 'order_date_from', 'order_date_to']),
         ]);
     }
 
@@ -53,11 +72,7 @@ class OrderController extends Controller
     */
     public function archive_orders($status)
     {
-        $orders = Order::where('status', $status)->get();
-
-        return Inertia::render('Orders/Archive/Index', [
-            'orders' => $orders,
-        ]);
+        return redirect()->route('orders.archive', ['status' => $status]);
     }
 
     /*

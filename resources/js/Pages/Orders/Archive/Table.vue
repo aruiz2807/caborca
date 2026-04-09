@@ -1,11 +1,15 @@
 <script setup>
-import { h, computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { h } from 'vue'
 import { DataTable, DataTableActionsColumn, DataTableColumnSorting } from '@/Components/data-table'
 import { useTrans } from '/resources/js/Composables/trans';
 
-const page = usePage()
-const orders = computed(() => page.props.orders)
+const props = defineProps({
+    orders: {
+        type: Array,
+        required: true
+    }
+})
+
 const ordersActions = [
 
 ]
@@ -78,7 +82,7 @@ const ordersColumns = [
         enableHiding: false,
         header: () => h('div', { class: 'font-bold text-right' }, useTrans('app.actions')),
         cell: ({ row }) => {
-            const record = page.props.orders[page.props.orders.findIndex(orders => orders.id === row.original.id)]
+            const record = props.orders.find(order => order.id === row.original.id)
             const actions = ordersActions
             const size = '825px'
 

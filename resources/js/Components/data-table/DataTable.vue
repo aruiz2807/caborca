@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { valueUpdater } from '@/lib/utils'
 import DataTablePaginator from './DataTablePaginator.vue'
 import DataTableColumnToggle from './DataTableColumnToggle.vue'
@@ -22,21 +22,25 @@ import {
 } from '@tanstack/vue-table'
 
 const props = defineProps({
-    data: Array,
-    columns: Array,
+    data: {
+        type: Array,
+        required: true
+    },
+    columns: {
+        type: Array,
+        required: true
+    },
     filter: String,
     filterPlaceholder: String,
 })
 
-let data = ref(props.data)
-const columns = props.columns
 const sorting = ref([])
 const columnFilters = ref([])
 const columnVisibility = ref({})
 
 const table = useVueTable({
-    data: data.value,
-    columns: columns,
+    get data() { return props.data },
+    get columns() { return props.columns },
 
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -52,14 +56,6 @@ const table = useVueTable({
         get columnFilters() { return columnFilters.value },
         get columnVisibility() { return columnVisibility.value },
     },
-});
-
-const updateTable = (updatedData) => {
-    data.value = updatedData
-};
-
-defineExpose({
-  updateTable
 });
 </script>
 

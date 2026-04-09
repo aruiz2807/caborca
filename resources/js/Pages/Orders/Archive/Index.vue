@@ -6,7 +6,7 @@ import { CalendarIcon } from 'lucide-vue-next'
 import { Button } from '@/Components/ui/button'
 import { Calendar } from '@/Components/ui/calendar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card'
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
+import { DateFormatter, getLocalTimeZone, today, parseDate } from '@internationalized/date'
 import { Label } from '@/Components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/Components/ui/select'
@@ -15,14 +15,20 @@ import { useTrans } from '/resources/js/Composables/trans';
 import UserLayout from "@Layouts/UserLayout.vue"
 import OrdersTable from "./Table.vue"
 
+const props = defineProps({
+    orders: Array,
+    dependencies: Array,
+    filters: Object,
+});
+
 const openDialog = ref(false)
 provide('openDialogState', openDialog);
 
 const form = useForm({
-    status: '1',
-    vehicle_dependency: '1',
-    order_date_from: null,
-    order_date_to: null,
+    status: props.filters?.status ?? '1',
+    vehicle_dependency: props.filters?.vehicle_dependency ?? '1',
+    order_date_from: props.filters?.order_date_from ? parseDate(props.filters.order_date_from) : null,
+    order_date_to: props.filters?.order_date_to ? parseDate(props.filters.order_date_to) : null,
 });
 
 const defaultPlaceholder = today(getLocalTimeZone())
@@ -56,11 +62,18 @@ const status = [
 const fetchOrdersData = () => {
     console.log('Fetch Orders Data');
 
-    router.visit(route('orders.archive_orders', { status: form.status }), { // defined server-side route
-    only: ['orders'], // Request only the 'orders' prop from the server
-    preserveState: true, // Keep the current form state/scroll position
+    const queryParams = {
+        status: form.status,
+        vehicle_dependency: form.vehicle_dependency,
+        order_date_from: form.order_date_from ? form.order_date_from.toString() : null,
+        order_date_to: form.order_date_to ? form.order_date_to.toString() : null,
+    };
+
+    router.get(route('orders.archive'), queryParams, {
+        preserveState: true,
+        replace: true,
+        only: ['orders', 'filters'],
         onSuccess: (page) => {
-            // The new 'orders' will be merged into the current page props automatically
             console.log('Orders data loaded:', page.props.orders);
         },
     });
@@ -85,11 +98,11 @@ const fetchOrdersData = () => {
                             </Label>
 
                             <Select v-model="form.status">
-                                <SelectTrigger class="w-full">
+                                <SelectTrigger class="w-[180px]">
                                     <SelectValue placeholder="Selecciona un estatus" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem v-for="option in status" :key="option.id" :value="option.id">
+                                    <SelectItem v-for="option in status" :key="option.id" :value="option.id.toString()">
                                         {{ option.title }}
                                     </SelectItem>
                                 </SelectContent>
@@ -102,11 +115,11 @@ const fetchOrdersData = () => {
                             </Label>
 
                             <Select v-model="form.vehicle_dependency">
-                                <SelectTrigger class="w-full">
+                                <SelectTrigger class="w-[200px]">
                                     <SelectValue placeholder="Selecciona una dependencia" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem v-for="dependency in $page.props.dependencies" :key="dependency.id" :value="dependency.id">
+                                    <SelectItem v-for="dependency in dependencies" :key="dependency.id" :value="dependency.id.toString()">
                                         {{ dependency.name }}
                                     </SelectItem>
                                 </SelectContent>
@@ -121,7 +134,7 @@ const fetchOrdersData = () => {
                             <Popover v-slot="{ close }">
                                 <PopoverTrigger as-child>
                                     <Button variant="outline" :class="cn('justify-start text-left font-normal', !form.order_date_from && 'text-muted-foreground')">
-                                        <CalendarIcon />
+                                        <CalendarIcon class="mr-2 h-4 w-4" />
                                         {{ form.order_date_from ? df.format(form.order_date_from.toDate(getLocalTimeZone())) : "Fecha inicial" }}
                                     </Button>
                                 </PopoverTrigger>
@@ -146,7 +159,7 @@ const fetchOrdersData = () => {
                             <Popover v-slot="{ close }">
                                 <PopoverTrigger as-child>
                                     <Button variant="outline" :class="cn('justify-start text-left font-normal', !form.order_date_to && 'text-muted-foreground')">
-                                        <CalendarIcon />
+                                        <CalendarIcon class="mr-2 h-4 w-4" />
                                         {{ form.order_date_to ? df.format(form.order_date_to.toDate(getLocalTimeZone())) : "Fecha final" }}
                                     </Button>
                                 </PopoverTrigger>
@@ -171,7 +184,7 @@ const fetchOrdersData = () => {
 
                 <CardContent>
                     <Separator />
-                    <OrdersTable />
+                    <OrdersTable :orders="orders" />
                 </CardContent>
             </Card>
         </div>

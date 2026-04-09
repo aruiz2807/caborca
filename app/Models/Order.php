@@ -20,6 +20,7 @@ class Order extends Model
         'vehicle_description',
         'vehicle_model',
         'vehicle_plate',
+        'vehicle_brand_id',
         'service_type_id',
         'service_requested_date',
         'service_location_id',

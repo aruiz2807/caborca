@@ -5,6 +5,8 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+.nvmrc
+/.gemini
 /.fleet
 /.idea
 /.nova
@@ -22,3 +24,4 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+GEMINI.md
