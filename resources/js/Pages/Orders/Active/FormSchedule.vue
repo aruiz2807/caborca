@@ -1,6 +1,6 @@
 <script setup>
-import { inject, computed  } from "vue"
-import { useForm } from '@inertiajs/vue3';
+import { inject, computed, ref  } from "vue"
+import { useForm, router } from '@inertiajs/vue3';
 import { cn } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
@@ -18,6 +18,7 @@ const props = defineProps({
     record: Object,
 });
 
+const noResults = ref(false)
 let openDialog = inject('openDialogState')
 const defaultPlaceholder = today(getLocalTimeZone())
 const df = new DateFormatter('es-MX', {
@@ -28,13 +29,37 @@ const isBlocked = computed(() => props.record.appointment !== null)
 const form = useForm({
     workshop: null,
     date: '',
+    time: '',
 });
 
+const getSlots = () => {
+    if (!form.workshop || !form.date) {
+        return
+    }
+
+    // Call backend
+    router.visit(route('orders.available_slots', { workshop: form.workshop, date: form.date.toString() }), {
+    only: ['slots'], // Request only the 'vehicleData' prop from the server
+    preserveState: true, // Keep the current form state/scroll position
+        onSuccess: (page) => {
+            // The new 'slots' will be merged into the current page props automatically
+            const slots = page.props.slots
+
+            if (!slots || slots.length === 0) {
+                noResults.value = true
+                return
+            }
+
+            noResults.value = false
+        },
+    });
+}
+
 const submit = () => {
-    const date = form.date
+    const date = form.date.toString()
 
     if (date) {
-        form.date = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`
+        form.date = date
     }
 
     form.post(route('orders.schedule', { order_id: props.record.id }), {
@@ -181,12 +206,12 @@ const submit = () => {
 
                 <CardContent>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="grid gap-2">
+                        <div class="grid gap-2 col-span-2">
                             <Label for="workshop">
                                 {{ $t("app.workshop") }}
                             </Label>
 
-                            <Select v-model="form.workshop">
+                            <Select v-model="form.workshop" @update:modelValue="getSlots">
                                 <SelectTrigger class="w-full">
                                     <SelectValue placeholder="Selecciona un taller" />
                                 </SelectTrigger>
@@ -219,12 +244,31 @@ const submit = () => {
                                         :default-placeholder="defaultPlaceholder"
                                         layout="month-and-year"
                                         initial-focus
-                                        @update:model-value="close"
+                                        @update:model-value="getSlots"
                                     />
                                 </PopoverContent>
                             </Popover>
 
                             <InputError class="mt-2" :message="form.errors.date" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="time">
+                                {{ $t("app.time") }}
+                            </Label>
+
+                            <Select v-model="form.time">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Selecciona un horario" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="slot in $page.props.slots" :key="slot.CIT_HORCITA" :value="slot.CIT_HORCITA">
+                                        {{ slot.CIT_HORCITA }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <InputError class="mt-2" :message="form.errors.time" />
                         </div>
                     </div>
                 </CardContent>

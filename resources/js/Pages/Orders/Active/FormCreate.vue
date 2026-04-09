@@ -1,7 +1,8 @@
 <script setup>
-import { inject } from "vue"
-import { useForm, router } from '@inertiajs/vue3';
+import { inject, ref } from "vue"
+import { useForm, usePage, router } from '@inertiajs/vue3';
 import { cn } from '@/lib/utils'
+import { Alert, AlertTitle, AlertDescription } from '@/Components/ui/alert'
 import { Button } from '@/Components/ui/button'
 import { CalendarIcon } from 'lucide-vue-next'
 import { Calendar } from '@/Components/ui/calendar'
@@ -14,16 +15,20 @@ import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectVa
 import { Textarea } from '@/Components/ui/textarea'
 import InputError from '@/Components/InputError.vue'
 
+const page = usePage();
+const noResults = ref(false)
+
 const form = useForm({
     purchase_order: '',
     economic_number: '',
     vehicle_vin: '',
     vehicle_plate: '',
-    vehicle_dependency: '',
-    vehicle_dependency_id: '',
+    vehicle_dependency: page.props.dependency.name,
+    vehicle_dependency_id: page.props.dependency.id,
     vehicle_taxid: '',
     vehicle_description: '',
     vehicle_model: '',
+    vehicle_brand: '',
     service_type: '',
     service_location: '',
     service_date: null,
@@ -37,22 +42,28 @@ const df = new DateFormatter('es-MX', {
 })
 
 const fetchVehicleData = () => {
-    console.log('Fetch Vehicle Data');
+    noResults.value = false
 
     router.visit(route('orders.vehicle_data', { economic_number: form.economic_number }), { // defined server-side route
     only: ['vehicleData'], // Request only the 'vehicleData' prop from the server
     preserveState: true, // Keep the current form state/scroll position
         onSuccess: (page) => {
             // The new 'vehicleData' will be merged into the current page props automatically
-            console.log('Vehicle data loaded:', page.props.vehicleData);
+            const vehicleData = page.props.vehicleData
 
-            form.vehicle_dependency = page.props.vehicleData[0].client;
-            form.vehicle_dependency_id = page.props.vehicleData[0].idClient;
-            form.vehicle_taxid = page.props.vehicleData[0].taxid;
-            form.vehicle_vin = page.props.vehicleData[0].vin;
-            form.vehicle_plate = page.props.vehicleData[0].plate;
-            form.vehicle_description = page.props.vehicleData[0].description;
-            form.vehicle_model = page.props.vehicleData[0].modelo;
+            if (!vehicleData || vehicleData.length === 0) {
+                noResults.value = true
+                return
+            }
+
+            const vehicle = vehicleData[0]
+            form.vehicle_dependency = vehicle.client;
+            form.vehicle_dependency_id = vehicle.idClient;
+            form.vehicle_taxid = vehicle.taxid;
+            form.vehicle_vin = vehicle.vin;
+            form.vehicle_plate = vehicle.plate;
+            form.vehicle_description = vehicle.description;
+            form.vehicle_model = vehicle.modelo;
         },
     });
 };
@@ -78,7 +89,6 @@ const submit = () => {
 <template>
     <form @submit.prevent="submit">
         <div class="grid grid-cols-2 gap-4">
-
             <div class="grid gap-2">
                 <Label for="purchase_order">
                     {{ $t("app.purchase_order") }}
@@ -89,7 +99,7 @@ const submit = () => {
 
             <div class="grid gap-2">
                 <Label for="economic_number">
-                    {{ $t("app.economic_number") }}
+                    {{ $t("app.economic_number") }} / {{ $t("app.vin") }}
                 </Label>
                 <div class="flex w-full max-w-sm items-center space-x-2">
                     <Input v-model="form.economic_number" id="economic_number" type="text" placeholder="Numero economico de la unidad" required />
@@ -99,6 +109,13 @@ const submit = () => {
                 </div>
                 <InputError class="mt-2" :message="form.errors.economic_number" />
             </div>
+
+            <Alert v-if="noResults" variant="destructive" class="col-span-2 mt-2">
+                <AlertTitle>No se encontró ningún vehículo que coincida con los datos proporcionados</AlertTitle>
+                <AlertDescription>
+                    Ingrese la información del vehiculo para registrarlo y generar la cita.
+                </AlertDescription>
+            </Alert>
 
             <Card class="col-span-2">
                 <CardHeader>
@@ -125,6 +142,25 @@ const submit = () => {
                             </Label>
                             <Input v-model="form.vehicle_taxid" id="vehicle_taxid" type="text" placeholder="RFC" required />
                             <InputError class="mt-2" :message="form.errors.vehicle_taxid" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="brand">
+                                {{ $t("app.brand") }}
+                            </Label>
+
+                            <Select v-model="form.vehicle_brand">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Selecciona una marca" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="brand in $page.props.brands" :key="brand.id" :value="brand.ID">
+                                        {{ brand.DESCRIPCION }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <InputError class="mt-2" :message="form.errors.vehicle_brand" />
                         </div>
 
                         <div class="grid gap-2">

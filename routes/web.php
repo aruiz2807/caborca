@@ -38,6 +38,7 @@ Route::middleware([
     Route::prefix('orders')->group(function () {
         Route::get('/active', [OrderController::class, 'active'])->name('orders.active');
         Route::get('/vehicle_data/{economic_number}', [OrderController::class, 'vehicle_data'])->name('orders.vehicle_data');
+        Route::get('/available_slots', [OrderController::class, 'available_slots'])->name('orders.available_slots');
         Route::post('/store', [OrderController::class, 'store'])->name("orders.store");
         Route::post('/schedule/{order_id}', [OrderController::class, 'schedule'])->name("orders.schedule");
 
