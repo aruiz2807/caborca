@@ -25,12 +25,17 @@ class OrderController extends Controller
         $services = Service::all(['id', 'name']);
         $locations = Location::all(['id', 'name']);
         $workshops = Workshop::all(['id', 'name']);
+        $brands = $this->brands();
+
+        $user = Auth::user();
 
         return Inertia::render('Orders/Active/Index', [
             'orders' => $orders,
             'services' => $services,
             'locations' => $locations,
             'workshops' => $workshops,
+            'brands' => $brands,
+            'dependency' => $user->dependency,
         ]);
     }
 
@@ -76,6 +81,64 @@ class OrderController extends Controller
     }
 
     /*
+    Get brands from external service
+    */
+    public function brands()
+    {
+        // GET request to external API
+        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/marcas', [
+            'base' => 'CHRCaborca_TecniHillo', //must correct, because the gob user does not have a workshop assigned
+        ]);
+
+        // Check if the request was successful
+        if ($response->successful()) {
+            // Get the response body as a PHP array/object
+            $data = $response->json();
+
+            return $data['data'];
+        }
+        else
+        {
+            // Handle errors
+            return null;
+        }
+    }
+
+    /*
+    Get available time slots from external service
+    */
+    public function available_slots(Request $request)
+    {
+        $workshop = $request->query('workshop');
+        $date = $request->query('date');
+        $base = Workshop::find($workshop)->database;
+        $user = Auth::user()->bpro_user;
+
+        // GET request to external API
+        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/horarios', [
+            "fecha" => date("d/m/Y", strtotime($date)),
+            "asesor" => $user,
+            'base' => $base,
+        ]);
+
+        // Check if the request was successful
+        if ($response->successful()) {
+            // Get the response body as a PHP array/object
+            $data = $response->json();
+
+            // Pass the data to view
+            return inertia('Orders/Active/Index', [
+                'slots' => $data['data'],
+            ]);
+        }
+        else
+        {
+            // Handle errors
+            return null;
+        }
+    }
+
+    /*
     Get vehicle data form external service
     */
     public function vehicle_data($economic_number)
@@ -89,6 +152,13 @@ class OrderController extends Controller
         if ($response->successful()) {
             // Get the response body as a PHP array/object
             $data = $response->json();
+
+            //Checks if data exists, if not returns an empty array
+            if (empty($data['data'])) {
+                return inertia('Orders/Active/Index', [
+                    'vehicleData' => [],
+                ]);
+            }
 
             //Save client data if doesnt exist on dependencies table
             $this->store_dependency($data['data'][0]);
@@ -133,6 +203,7 @@ class OrderController extends Controller
             'vehicle_description' => ['required', 'string', 'max:255'],
             'vehicle_plate' => ['required', 'string', 'max:10'],
             'vehicle_model' => ['required', 'string', 'max:4'],
+            'vehicle_brand' => ['required'],
             'service_type' => ['required'],
             'service_date' => ['required'],
             'service_location' => ['required'],
@@ -158,6 +229,7 @@ class OrderController extends Controller
             'vehicle_description' => $request['vehicle_description'],
             'vehicle_plate' => $request['vehicle_plate'],
             'vehicle_model' => $request['vehicle_model'],
+            'vehicle_brand_id' => $request['vehicle_brand'],
             'service_type_id' => $request['service_type'],
             'service_requested_date' => $request['service_date'],
             'service_location_id' => $request['service_location'],
@@ -198,7 +270,7 @@ class OrderController extends Controller
             $order->service_order_mileage = $request['service_order_kilometraje'];
             $order->service_order_user = $request['service_order_user'];
             $order->service_order_workshop_id = $workshop->id;
-            $order->status = 3; //Set to 3 for entered status
+            $order->status = 3; //Set to 3 for entered status (received in workshop)
             $order->save();
 
             return response()->json([
@@ -226,13 +298,16 @@ class OrderController extends Controller
             'base' => $workshop->database,
             'idasesor' => $request->user()->bpro_user,
             'fechaCita' => date("d/m/Y", strtotime($request['date'])), // $request['date'],
-            'horaCita' => '12:00',
+            'horaCita' => $request['time'],
             'idPersona' => $dependency->customer_number,
             'modelo' => $order->vehicle_model,
             'placas' => $order->vehicle_plate,
             'serie' => $order->vehicle_vin,
             'comentarios' => $order->service_description,
             'descripcionTrabajo' => $order->service_type,
+
+            'marca' => $order->vehicle_brand_id,
+            'descripcion' => $order->vehicle_description,
         ]);
 
         // Check if the request was successful
