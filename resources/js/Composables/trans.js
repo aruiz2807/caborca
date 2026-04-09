@@ -1,8 +1,13 @@
 import { usePage } from '@inertiajs/vue3';
+import { trans } from 'laravel-vue-i18n';
 
-export function useTrans( value )
+export function useTrans( value, replacements = {} )
 {
     const array = usePage().props.translations;
 
-    return array[ value ] != null ? array[ value ] : value;
+    if (array && array[value] != null) {
+        return array[value];
+    }
+
+    return trans(value, replacements);
 }
