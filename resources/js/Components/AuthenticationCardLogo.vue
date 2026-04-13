@@ -3,7 +3,7 @@ import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <Link :href="'/'">
+    <Link :href="route('welcome')">
         <svg
             class="size-16"
             viewBox="0 0 48 48"

@@ -26,8 +26,22 @@ import UserMenuFooter from './UserMenuFooter.vue'
 
 const page = usePage()
 
-const isMenuItemActive = (itemUrl) => {
-    return page.url.startsWith(itemUrl)
+const itemUrl = (item) => {
+    if (item.routeName) {
+        return route(item.routeName)
+    }
+
+    return item.url ?? '#'
+}
+
+const isMenuItemActive = (item) => {
+    if (item.activePatterns?.length) {
+        return item.activePatterns.some((pattern) => route().current(pattern))
+    }
+
+    const url = itemUrl(item)
+
+    return url !== '#' && page.url.startsWith(url)
 };
 
 </script>
@@ -42,7 +56,7 @@ const isMenuItemActive = (itemUrl) => {
             <SidebarGroup>
                 <SidebarGroupLabel>Platform</SidebarGroupLabel>
                 <SidebarMenu>
-                    <Collapsible v-for="item in MenuItems" :key="item.title" as-child :default-open="isMenuItemActive(item.url)" class="group/collapsible">
+                    <Collapsible v-for="item in MenuItems" :key="item.title" as-child :default-open="isMenuItemActive(item)" class="group/collapsible">
                         <SidebarMenuItem>
                             <CollapsibleTrigger as-child>
                                 <SidebarMenuButton :tooltip="item.title">
@@ -55,8 +69,8 @@ const isMenuItemActive = (itemUrl) => {
                             <CollapsibleContent>
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem v-for="subItem in item.options" :key="subItem.title" >
-                                        <SidebarMenuSubButton as-child :isActive="isMenuItemActive(subItem.url)">
-                                            <Link :href="subItem.url">
+                                        <SidebarMenuSubButton as-child :isActive="isMenuItemActive(subItem)">
+                                            <Link :href="itemUrl(subItem)">
                                                 <span>{{ subItem.title }}</span>
                                             </Link>
                                         </SidebarMenuSubButton>

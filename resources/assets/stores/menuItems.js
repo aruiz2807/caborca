@@ -8,27 +8,31 @@ import {
 export const MenuItems = [
     {
         title: 'Home',
-        url: '/home',
+        routeName: 'home',
+        activePatterns: ['home', 'dashboard'],
         icon: House,
         options: [
             {
                 title: 'Dashboard',
-                url: '/home',
+                routeName: 'home',
+                activePatterns: ['home', 'dashboard'],
             }
         ],
     },
     {
         title: 'Ordenes',
-        url: '/orders',
+        activePatterns: ['orders.*'],
         icon: File,
         options: [
             {
                 title: 'Activas',
-                url: '/orders/active',
+                routeName: 'orders.active',
+                activePatterns: ['orders.active'],
             },
             {
                 title: 'Historico',
-                url: '/orders/archive',
+                routeName: 'orders.archive',
+                activePatterns: ['orders.archive', 'orders.archive_orders'],
             },
         ],
     },
@@ -49,32 +53,38 @@ export const MenuItems = [
     },
     {
         title: 'Settings',
-        url: '/settings',
+        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*'],
         icon: Settings2,
         options: [
             {
                 title: 'Localidades',
-                url: '/settings/locations',
+                routeName: 'locations.index',
+                activePatterns: ['locations.*'],
             },
             {
                 title: 'Dependencias',
-                url: '/settings/dependencies',
+                routeName: 'dependencies.index',
+                activePatterns: ['dependencies.*'],
             },
             {
                 title: 'Talleres',
-                url: '/settings/workshops',
+                routeName: 'workshops.index',
+                activePatterns: ['workshops.*'],
             },
             {
                 title: 'Servicios',
-                url: '/settings/services',
+                routeName: 'services.index',
+                activePatterns: ['services.*'],
             },
             {
                 title: 'Usuarios',
-                url: '/settings/users',
+                routeName: 'users.index',
+                activePatterns: ['users.*'],
             },
             {
                 title: 'Roles',
-                url: '/settings/roles',
+                routeName: 'roles.index',
+                activePatterns: ['roles.*'],
             },
         ],
     },

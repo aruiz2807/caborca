@@ -61,7 +61,7 @@ const showMessage = () => {
                 </Button>
 
                 <Button variant="secondary">
-                    <Link href="/">{{ $t("app.cancel") }}</Link>
+                    <Link :href="route('welcome')">{{ $t("app.cancel") }}</Link>
                 </Button>
             </form>
 

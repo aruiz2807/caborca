@@ -20,7 +20,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('welcome');
 
 Route::middleware([
     'auth:sanctum',
@@ -28,7 +28,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return redirect()->route('home');
     })->name('dashboard');
 
     Route::get('/home', function () {
