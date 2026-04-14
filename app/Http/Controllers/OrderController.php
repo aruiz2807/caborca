@@ -17,6 +17,24 @@ use Inertia\Inertia;
 class OrderController extends Controller
 {
     /*
+    Get order statistics for the dashboard
+    */
+    public function home()
+    {
+        $currentYear = now()->year;
+
+        $totalOrders = Order::whereYear('service_requested_date', $currentYear)->count();
+        $attendedOrders = Order::whereYear('service_requested_date', $currentYear)->where('status', 4)->count();
+        $pendingOrders = Order::whereYear('service_requested_date', $currentYear)->whereIn('status', [1, 2, 3])->count();
+
+        return Inertia::render('Home', [
+            'totalOrders' => $totalOrders,
+            'attendedOrders' => $attendedOrders,
+            'pendingOrders' => $pendingOrders,
+        ]);
+    }
+
+    /*
     Get all active orders
     */
     public function active()

@@ -3,23 +3,41 @@ import UserLayout from "@Layouts/UserLayout.vue"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card'
 import { ChartContainer } from "@/Components/ui/chart";
 import { VisDonut } from "@unovis/vue"
+import { computed } from 'vue'
+
+const props = defineProps({
+  totalOrders: {
+    type: Number,
+    default: 0
+  },
+  attendedOrders: {
+    type: Number,
+    default: 0
+  },
+  pendingOrders: {
+    type: Number,
+    default: 0
+  },
+})
+
+const currentYear = new Date().getFullYear()
 
 // Pie chart data
-const data = [
-  { label: "Orders", value: 100 },
-]
+const data = computed(() => [
+  { label: "Orders", value: props.totalOrders || 0.1 }, // Avoid 0 for chart rendering
+])
 
 // Pie chart data
-const data_attended = [
-  { label: "Attended", value: 20 },
-  { label: "Orders", value: 80 },
-]
+const data_attended = computed(() => [
+  { label: "Attended", value: props.attendedOrders },
+  { label: "Orders", value: (props.totalOrders - props.attendedOrders) || 0 },
+])
 
 // Pie chart data
-const data_pending = [
-  { label: "Pending", value: 80 },
-  { label: "Orders", value: 20 },
-]
+const data_pending = computed(() => [
+  { label: "Pending", value: props.pendingOrders },
+  { label: "Orders", value: (props.totalOrders - props.pendingOrders) || 0 },
+])
 
 // Define chart colors
 const colors = {
@@ -38,7 +56,7 @@ const colors = {
                     <Card class="flex flex-col">
                         <CardHeader class="items-center pb-0">
                             <CardTitle>Indicador de ordenes solicitadas</CardTitle>
-                            <CardDescription>Ordenes de 2026</CardDescription>
+                            <CardDescription>Ordenes de {{ currentYear }}</CardDescription>
                         </CardHeader>
 
                         <CardContent>
@@ -52,7 +70,7 @@ const colors = {
                                     :arc-width="25"
                                     :radius="85"
                                     :central-label-offset-y="5"
-                                    central-label="10"
+                                    :central-label="props.totalOrders.toString()"
                                     central-sub-label="Ordenes"
                                 />
                             </ChartContainer>
@@ -64,7 +82,7 @@ const colors = {
                     <Card class="flex flex-col">
                         <CardHeader class="items-center pb-0">
                             <CardTitle>Indicador de ordenes atendidas</CardTitle>
-                            <CardDescription>Ordenes de 2026</CardDescription>
+                            <CardDescription>Ordenes de {{ currentYear }}</CardDescription>
                         </CardHeader>
 
                         <CardContent>
@@ -78,7 +96,7 @@ const colors = {
                                     :arc-width="25"
                                     :radius="85"
                                     :central-label-offset-y="5"
-                                    central-label="8"
+                                    :central-label="props.attendedOrders.toString()"
                                     central-sub-label="Ordenes"
                                 />
                             </ChartContainer>
@@ -89,7 +107,7 @@ const colors = {
                     <Card class="flex flex-col">
                         <CardHeader class="items-center pb-0">
                             <CardTitle>Indicador de ordenes pendientes</CardTitle>
-                            <CardDescription>Ordenes de 2026</CardDescription>
+                            <CardDescription>Ordenes de {{ currentYear }}</CardDescription>
                         </CardHeader>
 
                         <CardContent>
@@ -103,7 +121,7 @@ const colors = {
                                     :arc-width="25"
                                     :radius="85"
                                     :central-label-offset-y="5"
-                                    central-label="2"
+                                    :central-label="props.pendingOrders.toString()"
                                     central-sub-label="Ordenes"
                                 />
                             </ChartContainer>

@@ -31,9 +31,7 @@ Route::middleware([
         return redirect()->route('home');
     })->name('dashboard');
 
-    Route::get('/home', function () {
-        return Inertia::render('Home');
-    })->name('home');
+    Route::get('/home', [OrderController::class, 'home'])->name('home');
 
     Route::prefix('orders')->group(function () {
         Route::get('/active', [OrderController::class, 'active'])->name('orders.active');
