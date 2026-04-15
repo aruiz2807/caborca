@@ -64,6 +64,7 @@ const fetchVehicleData = () => {
             form.vehicle_plate = vehicle.plate;
             form.vehicle_description = vehicle.description;
             form.vehicle_model = vehicle.modelo;
+            form.vehicle_brand = vehicle.marca;
         },
     });
 };
