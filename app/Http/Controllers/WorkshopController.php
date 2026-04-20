@@ -13,7 +13,7 @@ class WorkshopController extends Controller
 {
     public function index()
     {
-        $workshops = Workshop::all(['id', 'name', 'location_id', 'database']);
+        $workshops = Workshop::with('location')->get(['id', 'name', 'location_id', 'database']);
         $locations = Location::all(['id', 'name']);
 
         return Inertia::render('Settings/Workshops/Index', [

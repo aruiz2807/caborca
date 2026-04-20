@@ -53,13 +53,14 @@ const ordersColumns = [
         ),
     },
     {
-        accessorKey: 'vehicle_dependency_label',
+        accessorKey: 'dependency.name',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
                 title: useTrans('app.dependency')
             })
         ),
+        cell: ({ row }) => row.original.dependency?.name ?? 'N/D',
     },
     {
         accessorKey: 'vehicle_description',
@@ -71,13 +72,14 @@ const ordersColumns = [
         ),
     },
     {
-        accessorKey: 'service_type_label',
+        accessorKey: 'service_type.name',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
                 title: useTrans('app.service')
             })
         ),
+        cell: ({ row }) => row.original.service_type?.name ?? 'N/D',
     },
     {
         accessorKey: 'appointment',

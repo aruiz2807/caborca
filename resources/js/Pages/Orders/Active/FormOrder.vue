@@ -120,7 +120,7 @@ const steps = [
                             {{ $t("app.dependency") }}
                         </Label>
                         <Label class="font-bold">
-                            {{ props.record.vehicle_dependency_label }}
+                            {{ props.record.dependency?.name ?? 'N/D' }}
                         </Label>
                     </div>
 
@@ -156,7 +156,7 @@ const steps = [
                             {{ $t("app.service_type") }}
                         </Label>
                         <Label class="font-bold">
-                            {{ record.service_type_label }}
+                            {{ record.service_type?.name ?? 'N/D' }}
                         </Label>
                     </div>
 
@@ -210,7 +210,7 @@ const steps = [
                                                     {{ $t("app.workshop") }}
                                                 </Label>
                                                 <Label class="font-bold">
-                                                    {{ props.record.appointment_workshop_label }}
+                                                    {{ props.record.appointment_workshop?.name ?? 'N/D' }}
                                                 </Label>
                                             </div>
                                         </div>

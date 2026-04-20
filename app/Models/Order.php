@@ -46,18 +46,6 @@ class Order extends Model
     }
 
     /**
-     * The attributes that are appended when model is retrieved
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'vehicle_dependency_label',
-        'service_type_label',
-        'service_location_label',
-        'appointment_workshop_label',
-    ];
-
-    /**
      * Get the dependency that owns the order.
      */
     public function dependency(): BelongsTo
@@ -87,37 +75,5 @@ class Order extends Model
     public function appointmentWorkshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class, 'appointment_workshop_id');
-    }
-
-    /**
-     * Get the order vehicle's dependency name
-     */
-    protected function getVehicleDependencyLabelAttribute()
-    {
-        return $this->dependency?->name ?? 'N/D';
-    }
-
-    /**
-     * Get the order's service type name
-     */
-    protected function getServiceTypeLabelAttribute()
-    {
-        return $this->serviceType?->name ?? 'N/D';
-    }
-
-    /**
-     * Get the order's location name
-     */
-    protected function getServiceLocationLabelAttribute()
-    {
-        return $this->serviceLocation?->name ?? 'N/D';
-    }
-
-    /**
-     * Get the order appointment's workshop name
-     */
-    protected function getAppointmentWorkshopLabelAttribute()
-    {
-        return $this->appointmentWorkshop?->name ?? 'N/D';
     }
 }

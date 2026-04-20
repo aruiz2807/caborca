@@ -14,7 +14,7 @@ class DependencyController extends Controller
 {
     public function index()
     {
-        $dependencies = Dependency::all(['id', 'name', 'customer_number', 'location_id', 'user_id']);
+        $dependencies = Dependency::with(['location', 'user'])->get(['id', 'name', 'customer_number', 'location_id', 'user_id']);
         $locations = Location::all(['id', 'name']);
         $users = User::select(['id', 'name'])->where('type', 'G')->get();
 

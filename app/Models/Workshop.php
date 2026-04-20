@@ -20,15 +20,6 @@ class Workshop extends Model
     ];
 
     /**
-     * The attributes that are appended when model is retrieved
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'location',
-    ];
-
-    /**
      * Get the orders for the workshop.
      */
     public function orders(): HasMany
@@ -42,13 +33,5 @@ class Workshop extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
-    }
-
-    /**
-     * Get the workshop's location name
-     */
-    protected function getLocationAttribute()
-    {
-        return $this->location?->name ?? 'N/D';
     }
 }

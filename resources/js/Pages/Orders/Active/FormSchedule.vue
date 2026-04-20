@@ -86,7 +86,7 @@ const submit = () => {
                     {{ $t("app.dependency") }}
                 </Label>
                 <Label class="font-bold">
-                    {{ record.vehicle_dependency }}
+                    {{ record.dependency?.name ?? 'N/D' }}
                 </Label>
             </div>
 
@@ -166,7 +166,7 @@ const submit = () => {
                                 {{ $t("app.service") }}
                             </Label>
                             <Label class="font-bold">
-                                {{ record.service_type }}
+                                {{ record.service_type?.name ?? 'N/D' }}
                             </Label>
                         </div>
 
@@ -175,7 +175,7 @@ const submit = () => {
                                 {{ $t("app.location") }}
                             </Label>
                             <Label class="font-bold">
-                                {{ record.service_location }}
+                                {{ record.service_location?.name ?? 'N/D' }}
                             </Label>
                         </div>
                         <div class="grid gap-2">

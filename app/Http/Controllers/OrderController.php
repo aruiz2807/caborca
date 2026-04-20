@@ -113,7 +113,7 @@ class OrderController extends Controller
     */
     public function archive(Request $request)
     {
-        $query = Order::query();
+        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

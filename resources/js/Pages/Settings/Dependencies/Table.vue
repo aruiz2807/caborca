@@ -53,22 +53,24 @@ const dependenciesColumns = [
         ),
     },
     {
-        accessorKey: 'location',
+        accessorKey: 'location.name',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
                 title: useTrans('app.location')
             })
         ),
+        cell: ({ row }) => row.original.location?.name ?? 'N/D',
     },
     {
-        accessorKey: 'user',
+        accessorKey: 'user.name',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
                 title: useTrans('app.assigned')
             })
         ),
+        cell: ({ row }) => row.original.user?.name ?? 'N/D',
     },
     {
         id: 'actions',
