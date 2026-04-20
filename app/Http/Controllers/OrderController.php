@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\Dependency;
 use App\Models\Location;
 use App\Models\Order;
@@ -24,8 +25,12 @@ class OrderController extends Controller
         $currentYear = now()->year;
 
         $totalOrders = Order::whereYear('service_requested_date', $currentYear)->count();
-        $attendedOrders = Order::whereYear('service_requested_date', $currentYear)->where('status', 4)->count();
-        $pendingOrders = Order::whereYear('service_requested_date', $currentYear)->whereIn('status', [1, 2, 3])->count();
+        $attendedOrders = Order::whereYear('service_requested_date', $currentYear)->where('status', OrderStatus::FINISHED)->count();
+        $pendingOrders = Order::whereYear('service_requested_date', $currentYear)->whereIn('status', [
+            OrderStatus::REQUESTED,
+            OrderStatus::SCHEDULED,
+            OrderStatus::ENTERED
+        ])->count();
 
         return Inertia::render('Home', [
             'totalOrders' => $totalOrders,
@@ -39,13 +44,59 @@ class OrderController extends Controller
     */
     public function active()
     {
-        $orders = Order::all();
+        $user = Auth::user();
+
+        // Fetch orders where status is not finished
+        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop'])
+            ->where('status', '!=', OrderStatus::FINISHED);
+            
+        // If the current user is not an admin, filter by their assigned dependency
+        if (!$user->hasAnyRole(['Admin', 'Super-Admin'])) {
+            $query->whereHas('dependency', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $orders = $query->get();
+        
+        // Filter orders that need status check (have appointment data)
+        $ordersToCheck = $orders->filter(fn($order) => 
+            $order->appointment && 
+            $order->appointmentWorkshop
+        );
+
+        if ($ordersToCheck->isNotEmpty()) 
+        {
+            foreach($ordersToCheck as $order)
+            {
+                $this->check_current_status($order);    
+            }
+            
+            /*
+            // Concurrent requests to external API to check statuses in parallel
+            $responses = Http::pool(fn ($pool) => 
+                $ordersToCheck->map(fn ($order) => 
+                    $pool->as($order->id)->withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/cita', [
+                            'base' => $order->getRelation('appointmentWorkshop')->database,
+                            'cita' => $order->appointment
+                        ])
+                )
+            );
+
+            // Process results and update models in the collection
+            foreach ($ordersToCheck as $order) {
+                $response = $responses[$order->id] ?? null;
+                if ($response && $response->successful()) {
+                    $this->updateOrderFromAPI($order, $response->json());
+                }
+            }
+            */
+        }
+
         $services = Service::all(['id', 'name']);
         $locations = Location::all(['id', 'name']);
         $workshops = Workshop::all(['id', 'name']);
         $brands = $this->brands();
-
-        $user = Auth::user();
 
         return Inertia::render('Orders/Active/Index', [
             'orders' => $orders,
@@ -252,6 +303,7 @@ class OrderController extends Controller
             'service_requested_date' => $request['service_date'],
             'service_location_id' => $request['service_location'],
             'service_description' => $request['service_description'],
+            'status' => OrderStatus::REQUESTED,
         ]);
 
         return to_route('orders.active')->with('message', 'stored');
@@ -288,7 +340,7 @@ class OrderController extends Controller
             $order->service_order_mileage = $request['service_order_kilometraje'];
             $order->service_order_user = $request['service_order_user'];
             $order->service_order_workshop_id = $workshop->id;
-            $order->status = 3; //Set to 3 for entered status (received in workshop)
+            $order->status = OrderStatus::ENTERED; //Set to ENTERED status (received in workshop)
             $order->save();
 
             return response()->json([
@@ -339,7 +391,7 @@ class OrderController extends Controller
             $order->appointment = $appointment;
             $order->appointment_date = $request['date'];
             $order->appointment_workshop_id = $request['workshop'];
-            $order->status = 2; //Set to 2 for scheduled status
+            $order->status = OrderStatus::SCHEDULED; //Set to SCHEDULED status
             $order->save();
 
             //TODO - Write log
@@ -351,5 +403,55 @@ class OrderController extends Controller
             'message' => 'Request failed!',
             'error' => $response->body(), // Get the raw response body
         ], $response->status());
+    }
+
+    /*
+    Check the current status of the order from an external server
+    */
+    public function check_current_status($order)
+    {
+        if (!$order || !$order->appointmentWorkshop || !$order->appointment) {
+            return;
+        }
+
+        // GET request to external API
+        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/cita', [
+            'base' => $order->getRelation('appointmentWorkshop')->database,
+            'cita' => $order->appointment
+        ]);
+
+        // Check if the request was successful
+        if ($response->successful()) {
+            $this->updateOrderFromAPI($order, $response->json());
+        }
+    }
+
+    /**
+     * function to update an order from external API response data
+     */
+    private function updateOrderFromAPI(Order $order, array $responseData): void
+    {
+        if (empty($responseData['data'])) {
+            return;
+        }
+
+        $externalData = $responseData['data'][0];
+
+        if (!empty($externalData['ORDEN'])) 
+        {
+            $order->service_order = $externalData['ORDEN'];
+            $order->service_order_date = $externalData['fecha_orden']; // date("Y-m-d", strtotime($externalData['fecha_orden']));
+            $order->service_order_status = $externalData['status_orden'];
+            $order->service_order_cone = $externalData['cono'];
+            $order->service_order_mileage = $externalData['kilometraje'];
+            $order->service_order_user = $externalData['id_asesor'];
+            $order->service_order_user_name = $externalData['asesor'];
+            
+            if ($order->status->value < OrderStatus::ENTERED->value) {
+                $order->status = OrderStatus::ENTERED;
+            }
+
+            $order->save();
+        }
     }
 }

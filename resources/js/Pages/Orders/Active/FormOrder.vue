@@ -1,4 +1,5 @@
 <script setup>
+import { h } from 'vue'
 import { CircleCheckBig, Ban, BookUser, Truck, CalendarCheck } from 'lucide-vue-next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
 import { Button } from '@/Components/ui/button'
@@ -119,7 +120,7 @@ const steps = [
                             {{ $t("app.dependency") }}
                         </Label>
                         <Label class="font-bold">
-                            {{ props.record.vehicle_dependency }}
+                            {{ props.record.vehicle_dependency_label }}
                         </Label>
                     </div>
 
@@ -155,7 +156,7 @@ const steps = [
                             {{ $t("app.service_type") }}
                         </Label>
                         <Label class="font-bold">
-                            {{ record.service_type }}
+                            {{ record.service_type_label }}
                         </Label>
                     </div>
 
@@ -209,7 +210,7 @@ const steps = [
                                                     {{ $t("app.workshop") }}
                                                 </Label>
                                                 <Label class="font-bold">
-                                                    {{ props.record.appointment_workshop }}
+                                                    {{ props.record.appointment_workshop_label }}
                                                 </Label>
                                             </div>
                                         </div>

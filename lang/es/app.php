@@ -52,6 +52,7 @@ return [
     'open' => 'Abrir',
     'order' => 'Orden',
     'reschedule' => 'Reagendar',
+    'role' => 'Rol',
     'save' => 'Guardar',
     'schedule' => 'Agendar',
     'service' => 'Servicio',

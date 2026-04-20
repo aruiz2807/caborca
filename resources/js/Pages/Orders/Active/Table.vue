@@ -53,7 +53,7 @@ const ordersColumns = [
         ),
     },
     {
-        accessorKey: 'vehicle_dependency',
+        accessorKey: 'vehicle_dependency_label',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
@@ -71,7 +71,7 @@ const ordersColumns = [
         ),
     },
     {
-        accessorKey: 'service_type',
+        accessorKey: 'service_type_label',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,

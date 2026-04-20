@@ -53,13 +53,16 @@ const usersColumns = [
         ),
     },
     {
-        accessorKey: 'type',
+        accessorKey: 'roles',
         header: ({ column }) => (
             h(DataTableColumnSorting, {
                 column: column,
-                title: useTrans('app.type')
+                title: useTrans('app.role')
             })
         ),
+        cell: ({ row }) => {
+            return h('div', row.original.roles.map(role => role.name).join(', '))
+        }
     },
     {
         accessorKey: 'bpro_user',

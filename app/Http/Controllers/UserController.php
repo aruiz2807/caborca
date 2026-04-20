@@ -11,15 +11,18 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Laravel\Jetstream\Jetstream;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all(['id', 'name', 'email', 'type', 'bpro_user']);
+        $users = User::with('roles')->get(['id', 'name', 'email', 'type', 'bpro_user']);
+        $roles = Role::all(['id', 'name']);
 
         return Inertia::render('Settings/Users/Index', [
-            'users' => $users
+            'users' => $users,
+            'roles' => $roles
         ]);
     }
 
@@ -29,15 +32,17 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', Password::default(), 'confirmed'],
+            'role' => ['required', 'exists:roles,name'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
-        User::create([
+        $user = User::create([
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
-            'type' => $request['type'],
         ]);
+
+        $user->assignRole($request['role']);
 
         return to_route('users.index')->with('message', 'stored');
     }

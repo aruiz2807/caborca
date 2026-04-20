@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dependency extends Model
 {
@@ -29,13 +30,27 @@ class Dependency extends Model
     ];
 
     /**
+     * Get the location that owns the dependency.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Get the user that owns the dependency.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Get the dependency's location name
      */
     protected function getLocationAttribute()
     {
-        $location = Location::find($this->location_id);
-
-        return empty($location) ? 'N/D' : $location->name;
+        return $this->location?->name ?? 'N/D';
     }
 
     /**
@@ -43,8 +58,6 @@ class Dependency extends Model
      */
     protected function getUserAttribute()
     {
-        $user = User::find($this->user_id);
-
-        return empty($user) ? 'N/D' : $user->name;
+        return $this->user?->name ?? 'N/D';
     }
 }

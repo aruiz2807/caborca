@@ -1,11 +1,13 @@
 <script setup>
 import { inject } from "vue"
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { Button } from '@/Components/ui/button'
 import { Input } from '@/Components/ui/input'
 import { Label } from '@/Components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select'
 import InputError from '@/Components/InputError.vue'
+
+const page = usePage();
 
 const form = useForm({
     name: '',
@@ -13,7 +15,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     terms: false,
-    type: 'A',
+    role: '',
 });
 
 let openDialog = inject('openDialogState')
@@ -66,20 +68,22 @@ const submit = () => {
         </div>
 
         <div class="grid gap-2">
-            <Label for="type">
-                {{ $t("app.type") }}
+            <Label for="role">
+                {{ $t("app.role") }}
             </Label>
-            <RadioGroup v-model="form.type" id="type">
-                <div class="flex pt-2 items-center space-x-2">
-                    <RadioGroupItem id="optionA" value="A" />
-                    <Label for="optionA">{{ $t("app.advisor") }}</Label>
-                </div>
-
-                <div class="flex pb-2 items-center space-x-2">
-                    <RadioGroupItem id="optionG" value="G" />
-                    <Label for="optionG">{{ $t("app.government") }}</Label>
-                </div>
-            </RadioGroup>
+            <Select v-model="form.role">
+                <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un rol" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectItem v-for="role in page.props.roles" :key="role.id" :value="role.name">
+                            {{ role.name }}
+                        </SelectItem>
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+            <InputError class="mt-2" :message="form.errors.role" />
         </div>
 
         <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
