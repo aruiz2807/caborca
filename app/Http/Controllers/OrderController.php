@@ -183,6 +183,12 @@ class OrderController extends Controller
         $base = Workshop::find($workshop)->database;
         $user = Auth::user()->bpro_user;
 
+        $array = [
+            "fecha" => date("d/m/Y", strtotime($date)),
+            "asesor" => $user,
+            'base' => $base,
+        ];
+
         // GET request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/horarios', [
             "fecha" => date("d/m/Y", strtotime($date)),
@@ -362,7 +368,7 @@ class OrderController extends Controller
         $order = Order::find($order_id);
         $dependency = Dependency::find($order->vehicle_dependency_id);
         $workshop = Workshop::find($request['workshop']);
-
+        
         // POST request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->post(config('api.api_url').'/api/dynamic/cita', [
             'base' => $workshop->database,
@@ -374,8 +380,7 @@ class OrderController extends Controller
             'placas' => $order->vehicle_plate,
             'serie' => $order->vehicle_vin,
             'comentarios' => $order->service_description,
-            'descripcionTrabajo' => $order->service_type,
-
+            'descripcionTrabajo' => $order->serviceType->name,
             'marca' => $order->vehicle_brand_id,
             'descripcion' => $order->vehicle_description,
         ]);

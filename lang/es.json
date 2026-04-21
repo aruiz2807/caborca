@@ -1,4 +1,6 @@
 {
+    "app.active": "Activo",
+    "app.inactive": "Inactivo",
     "app.actions": "Opciones",
     "app.advisor": "Asesor",
     "app.ascending": "Ascendente",
@@ -16,6 +18,7 @@
     "app.database": "Base de datos",
     "app.date": "Fecha",
     "app.delete": "Eliminar",
+    "app.delete_error": "No se puede eliminar el registro porque está siendo utilizado por otros módulos.",
     "app.dependency": "Dependencia",
     "app.descending": "Descendente",
     "app.description": "Descripción",

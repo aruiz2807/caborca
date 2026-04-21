@@ -166,6 +166,9 @@
         }
     },
     "validation.attributes": [],
+    "app.active": "Active",
+    "app.inactive": "Inactive",
+    "app.delete_error": "The record cannot be deleted because it is being used by other modules.",
     "pages.login.title": "Welcome",
     "pages.login.description": "Enter your email and password to login to your account.",
     "pages.login.email": "Email",

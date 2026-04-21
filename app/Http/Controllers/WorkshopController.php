@@ -13,12 +13,12 @@ class WorkshopController extends Controller
 {
     public function index()
     {
-        $workshops = Workshop::with('location')->get(['id', 'name', 'location_id', 'database']);
+        $workshops = Workshop::with('location')->get(['id', 'name', 'location_id', 'database', 'status']);
         $locations = Location::all(['id', 'name']);
 
         return Inertia::render('Settings/Workshops/Index', [
             'workshops' => $workshops,
-            'locations' => $locations
+            'locations' => $locations,
         ]);
     }
 
@@ -33,7 +33,7 @@ class WorkshopController extends Controller
         Workshop::create([
             'name' => $request['name'],
             'location_id' => $request['location_id'],
-            'database' => $request['database']
+            'database' => $request['database'],
         ]);
 
         return to_route('workshops.index')->with('message', 'stored');
@@ -41,12 +41,33 @@ class WorkshopController extends Controller
 
     public function update(Request $request, $id)
     {
+        Validator::make($request->input(), [
+            'name' => ['required', 'string', 'max:255'],
+            'location_id' => ['required', 'exists:locations,id'],
+            'database' => ['required', 'string', 'max:255'],
+            'status' => ['required', Rule::enum(\App\Enums\Status::class)],
+        ])->validate();
+
+        $workshop = Workshop::findOrFail($id);
+        $workshop->update([
+            'name' => $request['name'],
+            'location_id' => $request['location_id'],
+            'database' => $request['database'],
+            'status' => $request['status'],
+        ]);
 
         return to_route('workshops.index')->with('message', 'stored');
     }
 
     public function destroy(Request $request, $id)
     {
+        $workshop = Workshop::findOrFail($id);
+
+        if ($workshop->orders()->exists()) {
+            return to_route('workshops.index')->with('error', 'has-orders');
+        }
+
+        $workshop->delete();
 
         return to_route('workshops.index')->with('message', 'deleted');
     }
