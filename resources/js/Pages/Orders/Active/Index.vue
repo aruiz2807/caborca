@@ -24,6 +24,9 @@ const showMessage = (message) => {
     else if(message === 'deleted') {
         toast.warning(useTrans('pages.orders.toast_success_deleted'), { duration: 1500 });
     }
+    else if(message === 'cancelled') {
+        toast.warning(useTrans('pages.orders.toast_success_cancelled'), { duration: 1500 });
+    }
 };
 </script>
 

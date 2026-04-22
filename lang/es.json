@@ -9,6 +9,7 @@
     "app.brand": "Marca",
     "app.bpro_user": "Usuario BPro",
     "app.cancel": "Cancelar",
+    "app.cancel_appointment": "Cancelar cita",
     "app.code": "Código",
     "app.columns": "Columnas",
     "app.cone": "Cono",
@@ -89,8 +90,18 @@
 
     "permissions.create-order": "Crear orden de gobierno",
     "permissions.create-appointment": "Agendar cita de servicio",
+    "permissions.create-location": "Crear locaciones",
+    "permissions.create-dependency": "Crear dependencias",
+    "permissions.create-workshop": "Crear taller",
+    "permissions.create-service-type": "Crear tipos de servicio",
+
     "permissions.cancel-order": "Cancelar orden de gobierno",
     "permissions.cancel-appointment": "Cancelar cita de servicio",
+
+    "permissions.delete-location": "Eliminar locaciones",
+    "permissions.delete-dependency": "Eliminar dependencias",
+    "permissions.delete-workshop": "Eliminar talleres",
+    "permissions.delete-service-type": "Eliminar tipos de servicio",   
 
     "validation.accepted": "El campo :attribute debe aceptarse.",
     "validation.accepted_if": "El campo :attribute debe aceptarse cuando :other es :value.",
@@ -281,6 +292,7 @@
     "pages.orders.button_query": "Consultar ordenes de gobierno",
     "pages.orders.toast_success_stored": "La orden de gobierno se almaceno de forma exitosa",
     "pages.orders.toast_success_deleted": "La orden de gobierno se eliminó de forma exitosa",
+    "pages.orders.toast_success_cancelled": "La cita se canceló de forma exitosa",
     "pages.orders.vehicle_data": "Datos del vehiculo",
     "pages.orders.service_data": "Datos del servicio",
     "pages.orders.schedule_description": "Seleccione la fecha en el que se realizará la orden de gobierno",

@@ -22,6 +22,7 @@ const locationsActions = [
         icon: Trash2,
         title: useTrans('pages.settings.locations_delete_title'),
         description: useTrans('pages.settings.locations_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-location'),
     },
 ]
 const locationsColumns = [

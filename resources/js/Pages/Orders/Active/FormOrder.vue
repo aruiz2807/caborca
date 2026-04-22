@@ -1,5 +1,6 @@
 <script setup>
-import { h } from 'vue'
+import { ref } from 'vue'
+import { useForm, usePage } from '@inertiajs/vue3'
 import { CircleCheckBig, Ban, BookUser, Truck, CalendarCheck } from 'lucide-vue-next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
 import { Button } from '@/Components/ui/button'
@@ -7,38 +8,41 @@ import { Label } from '@/Components/ui/label'
 import { Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/Components/ui/stepper'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/Components/ui/dialog'
+import { Textarea } from '@/Components/ui/textarea'
 import { useTrans } from '/resources/js/Composables/trans';
 
 const props = defineProps({
     record: Object,
 });
 
-const events = [
-    {
-        id: 1,
-        date: '2026-01-17',
-        description: 'Solicitud creada',
-        user: 'Admin',
-    },
-    {
-        id: 2,
-        date: '2026-01-17',
-        description: 'Cita agendada para el 20 de enero',
-        user: 'Asesor',
-    },
-    {
-        id: 3,
-        date: '2026-01-18',
-        description: 'Cita cancelada por refacciones',
-        user: 'Asesor',
-    },
-    {
-        id: 4,
-        date: '2026-01-19',
-        description: 'Credit agendada para el 25 de enero',
-        user: 'Asesor',
-    },
-];
+const page = usePage();
+const showCancelDialog = ref(false);
+
+const cancelForm = useForm({
+    motive: '',
+});
+
+const confirmCancel = () => {
+    cancelForm.post(route('orders.cancel_appointment', props.record.id), {
+        onSuccess: () => {
+            showCancelDialog.value = false;
+            cancelForm.reset();
+        },
+    });
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
 
 const steps = [
     {
@@ -181,7 +185,7 @@ const steps = [
                         <TabsContent value="appointment">
                             <Card>
                                 <CardContent>
-                                    <div class="grid grid-cols-4 gap-2 pt-6">
+                                    <div v-if="props.record.appointment" class="grid grid-cols-4 gap-2 pt-6">
                                         <div class="grid grid-cols-2 gap-4">
                                             <div class="grid gap-2">
                                                 <Label>
@@ -216,10 +220,15 @@ const steps = [
                                         </div>
 
                                         <div class="flex flex-row-reverse">
-                                            <Button>
-                                                {{ $t("app.cancel") + " Cita" }}
-                                            </Button>
+                                            <div v-if="$page.props.auth.permissions.includes('cancel-appointment')">
+                                                <Button @click="showCancelDialog = true">
+                                                    {{ $t("app.cancel_appointment") }}
+                                                </Button>
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div v-else class="p-6 text-center text-muted-foreground">
+                                        {{ $t('pages.orders.status_requested') }} - Sin cita agendada
                                     </div>
                                 </CardContent>
                             </Card>
@@ -305,19 +314,26 @@ const steps = [
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>ID</TableHead>
                                                 <TableHead>Fecha</TableHead>
                                                 <TableHead>Evento</TableHead>
+                                                <TableHead>Descripción</TableHead>
                                                 <TableHead>Usuario</TableHead>
                                             </TableRow>
                                         </TableHeader>
 
-                                        <TableBody>
-                                            <TableRow v-for="event in events" :key="event.id">
-                                                <TableCell class="font-medium">{{ event.id }}</TableCell>
-                                                <TableCell>{{ event.date }}</TableCell>
-                                                <TableCell>{{ event.description }}</TableCell>
-                                                <TableCell>{{ event.user }}</TableCell>
+                                        <TableBody v-if="props.record.events && props.record.events.length">
+                                            <TableRow v-for="event in props.record.events" :key="event.id">
+                                                <TableCell>{{ formatDate(event.created_at) }}</TableCell>
+                                                <TableCell class="font-medium">{{ event.event_name }}</TableCell>
+                                                <TableCell>{{ event.description ?? '-' }}</TableCell>
+                                                <TableCell>{{ event.user?.name ?? 'Sistema' }}</TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                        <TableBody v-else>
+                                            <TableRow>
+                                                <TableCell colspan="4" class="text-center text-muted-foreground">
+                                                    No hay eventos registrados para esta orden.
+                                                </TableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
@@ -329,4 +345,39 @@ const steps = [
             </CardContent>
         </Card>
     </div>
+
+    <Dialog v-model:open="showCancelDialog">
+        <DialogContent class="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>{{ $t('app.cancel_appointment') }}</DialogTitle>
+                <DialogDescription>
+                    ¿Estás seguro de que deseas cancelar esta cita? Por favor, indica el motivo.
+                </DialogDescription>
+            </DialogHeader>
+            <div class="grid gap-4 py-4">
+                <div class="grid gap-2">
+                    <Label for="motive">Motivo de cancelación</Label>
+                    <Textarea
+                        id="motive"
+                        v-model="cancelForm.motive"
+                        placeholder="Escriba aquí el motivo..."
+                    />
+                    <div v-if="cancelForm.errors.motive" class="text-sm text-destructive">
+                        {{ cancelForm.errors.motive }}
+                    </div>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" @click="showCancelDialog = false">
+                    {{ $t('app.cancel') }}
+                </Button>
+                <Button
+                    :disabled="cancelForm.processing || !cancelForm.motive"
+                    @click="confirmCancel"
+                >
+                    Confirmar Cancelación
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>

@@ -46,13 +46,18 @@ const isMenuItemActive = (item) => {
 
 const hasAccess = (item) => {
     const userRoles = page.props.auth?.roles || [];
+    const userType = page.props.auth?.user?.type;
+    const isSuperAdmin = userRoles.includes('Super-Admin');
     
-    // As a starting point, only Super-Admin can access the Settings menu
-    if (item.title === 'Settings') {
-        return userRoles.includes('Super-Admin');
+    // External users (type 'G') cannot see Settings
+    if (item.title === 'Settings' && userType === 'G') {
+        return false;
+    }
+
+    if (item.title === 'Usuarios' || item.title === 'Roles') {
+        return isSuperAdmin;
     }
     
-    // Future improvements: check item.roles or item.permissions
     return true;
 };
 </script>

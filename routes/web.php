@@ -39,22 +39,25 @@ Route::middleware([
         Route::get('/available_slots', [OrderController::class, 'available_slots'])->name('orders.available_slots');
         Route::post('/store', [OrderController::class, 'store'])->name("orders.store");
         Route::post('/schedule/{order_id}', [OrderController::class, 'schedule'])->name("orders.schedule");
+        Route::post('/cancel_appointment/{order_id}', [OrderController::class, 'cancel_appointment'])->name("orders.cancel_appointment");
 
         Route::get('/archive', [OrderController::class, 'archive'])->name('orders.archive');
         Route::get('/archive/{status}', [OrderController::class, 'archive_orders'])->name('orders.archive_orders');
     });
 
-    Route::prefix('settings')->middleware('role:Super-Admin')->group(function () {
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/users', [UserController::class, 'store'])->name("users.store");
-        Route::put('/users/{user}', [UserController::class, 'update'])->name("users.update");
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name("users.destroy");
+    Route::prefix('settings')->middleware('can:access-settings')->group(function () {
+        Route::middleware('role:Super-Admin')->group(function () {
+            Route::get('/users', [UserController::class, 'index'])->name('users.index');
+            Route::post('/users', [UserController::class, 'store'])->name("users.store");
+            Route::put('/users/{user}', [UserController::class, 'update'])->name("users.update");
+            Route::delete('/users/{user}', [UserController::class, 'destroy'])->name("users.destroy");
 
-        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-        Route::post('/roles', [RoleController::class, 'store'])->name("roles.store");
-        Route::put('/roles/{role}', [RoleController::class, 'update'])->name("roles.update");
-        Route::put('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name("roles.update_permissions");
-        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name("roles.destroy");
+            Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+            Route::post('/roles', [RoleController::class, 'store'])->name("roles.store");
+            Route::put('/roles/{role}', [RoleController::class, 'update'])->name("roles.update");
+            Route::put('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name("roles.update_permissions");
+            Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name("roles.destroy");
+        });
 
         Route::get('/dependencies', [DependencyController::class, 'index'])->name('dependencies.index');
         Route::post('/dependencies', [DependencyController::class, 'store'])->name("dependencies.store");

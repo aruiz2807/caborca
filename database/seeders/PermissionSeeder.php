@@ -20,6 +20,18 @@ class PermissionSeeder extends Seeder
         $permissions = [
             'create-order',
             'create-appointment',
+            'create-location',
+            'create-dependency',
+            'create-workshop',
+            'create-service-type',
+
+            'cancel-order',
+            'cancel-appointment',
+            
+            'delete-location',
+            'delete-dependency',
+            'delete-workshop',
+            'delete-service-type',            
         ];
 
         foreach ($permissions as $permission) {

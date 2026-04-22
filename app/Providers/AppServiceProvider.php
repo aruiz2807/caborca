@@ -12,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind('order-event', function ($app) {
+            return new \App\Services\OrderEventService();
+        });
     }
 
     /**
@@ -24,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability)
         {
             return $user->hasRole('Super-Admin') ? true : null;
+        });
+
+        Gate::define('access-settings', function ($user) {
+            return $user->type !== 'G';
         });
     }
 }

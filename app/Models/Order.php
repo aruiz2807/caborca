@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
@@ -75,5 +76,13 @@ class Order extends Model
     public function appointmentWorkshop(): BelongsTo
     {
         return $this->belongsTo(Workshop::class, 'appointment_workshop_id');
+    }
+
+    /**
+     * Get the events associated with the order.
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(OrderEvent::class)->orderBy('created_at', 'desc');
     }
 }

@@ -40,9 +40,11 @@ const showMessage = (message, type = 'success') => {
                             <CardDescription class="mt-2">{{ $t("pages.settings.workshops_description") }}</CardDescription>
                         </div>
 
-                        <Button @click="openDialog = true" >
-                            {{ $t("pages.settings.workshops_button_create") }}
-                        </Button>
+                        <div v-if="$page.props.auth.permissions.includes('create-workshop')">
+                            <Button @click="openDialog = true" >
+                                {{ $t("pages.settings.workshops_button_create") }}
+                            </Button>
+                        </div>
 
                         <WorkshopsCreateDialog />
                     </div>

@@ -73,9 +73,9 @@ const { isMobile } = useSidebar()
                                 Profile
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem v-if="$page.props.jetstream.hasApiFeatures && $page.props.auth.roles.includes('Super-Admin')">
                             <Braces />
-                            <Link v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
+                            <Link :href="route('api-tokens.index')">
                                 API Tokens
                             </Link>
                         </DropdownMenuItem>

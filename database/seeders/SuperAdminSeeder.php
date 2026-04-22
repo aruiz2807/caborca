@@ -21,18 +21,18 @@ class SuperAdminSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Gets all permissions via Gate::before rule; see AppServiceProvider
-        $superAdminRole = Role::create([
+        $superAdminRole = Role::firstOrCreate([
             'name' => 'Super-Admin',
             'guard_name' => 'web',
             'description' => 'Acceso a todas las funcionalidades',
         ]);
 
         //Create super admin user
-        $user = User::create([
+        $user = User::firstOrCreate([
             'name' => 'Super Admin',
             'email' => 'super@admin.com',
             'password' => Hash::make('supersecret'),
-            'email_verified_at' => Carbon::now(),
+            'email_verified_at' => '2026-01-01 00:00:00',
         ]);
 
         //Assign super admin role to super admin user

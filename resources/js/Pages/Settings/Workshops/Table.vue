@@ -22,6 +22,7 @@ const workshopsActions = [
         icon: Trash2,
         title: useTrans('pages.settings.workshops_delete_title'),
         description: useTrans('pages.settings.workshops_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-workshop'),
     },
 ]
 const workshopsColumns = [

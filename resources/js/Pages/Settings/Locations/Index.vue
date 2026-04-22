@@ -38,10 +38,12 @@ const showMessage = (message, error) => {
                             <CardDescription class="mt-2">{{ $t("pages.settings.locations_description") }}</CardDescription>
                         </div>
 
-                        <Button @click="openDialog = true" >
-                            {{ $t("pages.settings.locations_button_create") }}
-                        </Button>
-
+                        <div v-if="$page.props.auth.permissions.includes('create-dependency')">
+                            <Button @click="openDialog = true" >
+                                {{ $t("pages.settings.locations_button_create") }}
+                            </Button>
+                        </div>
+                        
                         <LocationsCreateDialog />
                     </div>
                 </CardHeader>

@@ -47,7 +47,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         // Fetch orders where status is not finished
-        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop'])
+        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop', 'events.user'])
             ->where('status', '!=', OrderStatus::FINISHED);
             
         // If the current user is not an admin, filter by their assigned dependency
@@ -113,7 +113,7 @@ class OrderController extends Controller
     */
     public function archive(Request $request)
     {
-        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop']);
+        $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop', 'events.user']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -260,7 +260,7 @@ class OrderController extends Controller
             Dependency::create([
                 'name' => $data['client'],
                 'customer_number' => $data['idClient'],
-                'location_id' => 1,
+                'location_id' => 1, //TODO remove harcoded id
                 'user_id' => Auth::id(),
             ]);
         }
@@ -297,7 +297,7 @@ class OrderController extends Controller
             $dependency = Dependency::select(['id', 'name'])->where('user_id', $request->user()->id)->first();
         }
 
-        Order::create([
+        $order = Order::create([
             'purchase_order' => $request['purchase_order'],
             'economic_number' => $request['economic_number'],
             'order_file' => 'file_name.tmp',
@@ -313,6 +313,8 @@ class OrderController extends Controller
             'service_description' => $request['service_description'],
             'status' => OrderStatus::REQUESTED,
         ]);
+
+        \App\Facades\OrderEvent::log($order, 'Solicitud creada');
 
         return to_route('orders.active')->with('message', 'stored');
     }
@@ -403,7 +405,7 @@ class OrderController extends Controller
             $order->status = OrderStatus::SCHEDULED; //Set to SCHEDULED status
             $order->save();
 
-            //TODO - Write log
+            \App\Facades\OrderEvent::log($order, 'Cita agendada', "Cita para el día {$request['date']} en {$workshop->name}");
 
             return to_route('orders.active')->with(['message' => 'stored', 'cit_id_cita' => $appointment]);
         }
@@ -411,6 +413,44 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Request failed!',
             'error' => $response->body(), // Get the raw response body
+        ], $response->status());
+    }
+
+    public function cancel_appointment(Request $request, $order_id)
+    {
+        abort_if(!$request->user()->can('cancel-appointment'), 403);
+
+        Validator::make($request->input(), [
+            'motive' => ['required', 'string', 'max:255'],
+        ])->validate();
+
+        $order = Order::find($order_id);
+        $workshop = Workshop::find($order->appointment_workshop_id);
+
+        // DELETE request to external API
+        $response = Http::withToken(config('api.api_key'))->acceptJson()->delete(config('api.api_url').'/api/dynamic/cita', [
+            'base' => $workshop->database,
+            'cita' => $order->appointment,
+        ]);
+
+        // Check if the request was successful
+        if ($response->successful())
+        {
+            // Update order record in database
+            $order->appointment = null;
+            $order->appointment_date = null;
+            $order->appointment_workshop_id = null;
+            $order->status = OrderStatus::REQUESTED; // Reset to REQUESTED status
+            $order->save();
+
+            \App\Facades\OrderEvent::log($order, 'Cita cancelada', $request['motive']);
+
+            return to_route('orders.active')->with('message', 'cancelled');
+        }
+
+        return response()->json([
+            'message' => 'Request failed!',
+            'error' => $response->body(),
         ], $response->status());
     }
 

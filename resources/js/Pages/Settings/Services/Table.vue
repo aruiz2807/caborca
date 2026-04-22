@@ -22,6 +22,7 @@ const servicesActions = [
         icon: Trash2,
         title: useTrans('pages.settings.services_delete_title'),
         description: useTrans('pages.settings.services_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-service-type'),
     },
 ]
 const servicesColumns = [

@@ -22,6 +22,7 @@ const dependenciesActions = [
         icon: Trash2,
         title: useTrans('pages.settings.dependencies_delete_title'),
         description: useTrans('pages.settings.dependencies_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-dependency'),
     },
 ]
 const dependenciesColumns = [
