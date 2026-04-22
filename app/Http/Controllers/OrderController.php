@@ -288,13 +288,13 @@ class OrderController extends Controller
         ])->validate();
 
         //check if customer number is registered on the dependencies table
-        $dependency = Dependency::select(['id', 'name'])->where('customer_number', $request['vehicle_dependency_id'])->first();
+        $dependency = Dependency::select(['id', 'name', 'advisor_id'])->where('customer_number', $request['vehicle_dependency_id'])->first();
 
         //if vehicle dependency is not present, search form the dependency associated to the user
         if(!$dependency)
         {
             //Get the dependency associated with the user requesting the order
-            $dependency = Dependency::select(['id', 'name'])->where('user_id', $request->user()->id)->first();
+            $dependency = Dependency::select(['id', 'name', 'advisor_id'])->where('user_id', $request->user()->id)->first();
         }
 
         $order = Order::create([
@@ -315,6 +315,14 @@ class OrderController extends Controller
         ]);
 
         \App\Facades\OrderEvent::log($order, 'Solicitud creada');
+
+        if ($dependency && $dependency->advisor_id) {
+            \App\Facades\Message::send(
+                $dependency->advisor_id,
+                'Nueva Orden: ' . $order->purchase_order,
+                'Se ha creado una nueva orden para la dependencia ' . $dependency->name . '. No. Económico: ' . $order->economic_number
+            );
+        }
 
         return to_route('orders.active')->with('message', 'stored');
     }
@@ -496,8 +504,14 @@ class OrderController extends Controller
             $order->service_order_user = $externalData['id_asesor'];
             $order->service_order_user_name = $externalData['asesor'];
             
-            if ($order->status->value < OrderStatus::ENTERED->value) {
+            if ($order->status->value < OrderStatus::ENTERED->value) 
+            {
                 $order->status = OrderStatus::ENTERED;
+            }
+
+            if ($order->service_order_status === 'CERRADA')
+            {
+                $order->status = OrderStatus::FINISHED;   
             }
 
             $order->save();

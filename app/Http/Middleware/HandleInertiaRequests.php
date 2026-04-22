@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+                'unreadMessagesCount' => $request->user() ? \App\Models\Message::where('user_id', $request->user()->id)->where('status', \App\Enums\MessageStatus::NEW)->count() : 0,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

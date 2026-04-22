@@ -19,6 +19,7 @@ class Dependency extends Model
         'customer_number',
         'location_id',
         'user_id',
+        'advisor_id',
         'status',
     ];
 
@@ -48,6 +49,14 @@ class Dependency extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the advisor that is assigned to the dependency.
+     */
+    public function advisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'advisor_id');
     }
 
     /**

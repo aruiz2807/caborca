@@ -79,6 +79,9 @@ const hasAccess = (item) => {
                                     <SidebarMenuButton :tooltip="item.title">
                                         <component :is="item.icon" v-if="item.icon" />
                                         <span>{{ item.title }}</span>
+                                        <span v-if="item.title === 'Mensajes' && page.props.auth.unreadMessagesCount > 0" class="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                                            {{ page.props.auth.unreadMessagesCount }}
+                                        </span>
                                         <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                     </SidebarMenuButton>
                                 </CollapsibleTrigger>

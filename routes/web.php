@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DependencyController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiceController;
@@ -32,6 +33,12 @@ Route::middleware([
     })->name('dashboard');
 
     Route::get('/home', [OrderController::class, 'home'])->name('home');
+
+    Route::prefix('messages')->group(function () {
+        Route::get('/', [MessageController::class, 'index'])->name('messages.index');
+        Route::put('/{message}', [MessageController::class, 'update'])->name('messages.update');
+        Route::delete('/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    });
 
     Route::prefix('orders')->group(function () {
         Route::get('/active', [OrderController::class, 'active'])->name('orders.active');

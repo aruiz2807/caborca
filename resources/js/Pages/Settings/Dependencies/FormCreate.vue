@@ -12,6 +12,7 @@ const form = useForm({
     customer_number: '',
     location_id: '',
     user_id: '',
+    advisor_id: '',
 });
 
 let openDialog = inject('openDialogState')
@@ -82,6 +83,25 @@ const submit = () => {
             </Select>
 
             <InputError class="mt-2" :message="form.errors.user_id" />
+        </div>
+
+        <div class="grid gap-2">
+            <Label for="advisor">
+                {{ $t("app.advisor") }}
+            </Label>
+
+            <Select v-model="form.advisor_id">
+                <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Selecciona el asesor" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="advisor in $page.props.advisors" :key="advisor.id" :value="advisor.id">
+                        {{ advisor.name }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+
+            <InputError class="mt-2" :message="form.errors.advisor_id" />
         </div>
 
         <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

@@ -38,16 +38,14 @@ export const MenuItems = [
     },
     {
         title: 'Mensajes',
-        url: '#',
+        routeName: 'messages.index',
+        activePatterns: ['messages.*'],
         icon: Mail,
         options: [
             {
-                title: 'Nuevos',
-                url: '#',
-            },
-            {
-                title: 'Leidos',
-                url: '#',
+                title: 'Recibidos',
+                routeName: 'messages.index',
+                activePatterns: ['messages.*'],
             },
         ],
     },

@@ -15,6 +15,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('order-event', function ($app) {
             return new \App\Services\OrderEventService();
         });
+
+        $this->app->bind('message', function ($app) {
+            return new \App\Services\MessageService();
+        });
     }
 
     /**

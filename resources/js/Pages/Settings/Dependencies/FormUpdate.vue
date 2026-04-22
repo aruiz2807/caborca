@@ -18,6 +18,7 @@ const form = useForm({
     customer_number: props.record.customer_number,
     location_id: props.record.location_id.toString(), // convert to string to match SelectItem value if it's numeric
     user_id: props.record.user_id.toString(),
+    advisor_id: props.record.advisor_id ? props.record.advisor_id.toString() : '',
     status: props.record.status,
 });
 
@@ -82,6 +83,23 @@ const submit = () => {
                 </SelectContent>
             </Select>
             <InputError class="mt-2" :message="form.errors.user_id" />
+        </div>
+
+        <div class="grid gap-2">
+            <Label for="advisor_id">
+                {{ $t("app.advisor") }}
+            </Label>
+            <Select v-model="form.advisor_id">
+                <SelectTrigger>
+                    <SelectValue :placeholder="$t('app.advisor')" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="advisor in page.props.advisors" :key="advisor.id" :value="advisor.id.toString()">
+                        {{ advisor.name }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+            <InputError class="mt-2" :message="form.errors.advisor_id" />
         </div>
 
         <div class="grid gap-2">

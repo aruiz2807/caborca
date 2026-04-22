@@ -74,6 +74,16 @@ const dependenciesColumns = [
         cell: ({ row }) => row.original.user?.name ?? 'N/D',
     },
     {
+        accessorKey: 'advisor.name',
+        header: ({ column }) => (
+            h(DataTableColumnSorting, {
+                column: column,
+                title: useTrans('app.advisor')
+            })
+        ),
+        cell: ({ row }) => row.original.advisor?.name ?? 'N/D',
+    },
+    {
         accessorKey: 'status',
         header: ({ column }) => (
             h(DataTableColumnSorting, {

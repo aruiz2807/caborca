@@ -15,14 +15,16 @@ class DependencyController extends Controller
 {
     public function index()
     {
-        $dependencies = Dependency::with(['location', 'user'])->get(['id', 'name', 'customer_number', 'location_id', 'user_id', 'status']);
+        $dependencies = Dependency::with(['location', 'user', 'advisor'])->get(['id', 'name', 'customer_number', 'location_id', 'user_id', 'advisor_id', 'status']);
         $locations = Location::all(['id', 'name']);
         $users = User::select(['id', 'name'])->where('type', 'G')->get();
+        $advisors = User::select(['id', 'name'])->where('type', 'A')->get();
 
         return Inertia::render('Settings/Dependencies/Index', [
             'dependencies' => $dependencies,
             'locations' => $locations,
             'users' => $users,
+            'advisors' => $advisors,
         ]);
     }
 
@@ -33,6 +35,7 @@ class DependencyController extends Controller
             'customer_number' => ['required', 'string', 'max:10', Rule::unique('dependencies')],
             'location_id' => ['required'],
             'user_id' => ['required'],
+            'advisor_id' => ['nullable'],
             'status' => ['nullable', Rule::enum(Status::class)],
         ])->validate();
 
@@ -41,6 +44,7 @@ class DependencyController extends Controller
             'customer_number' => $request['customer_number'],
             'location_id' => $request['location_id'],
             'user_id' => $request['user_id'],
+            'advisor_id' => $request['advisor_id'],
             'status' => $request['status'] ?? Status::ACTIVE,
         ]);
 
@@ -54,6 +58,7 @@ class DependencyController extends Controller
             'customer_number' => ['required', 'string', 'max:10', Rule::unique('dependencies')->ignore($id)],
             'location_id' => ['required'],
             'user_id' => ['required'],
+            'advisor_id' => ['nullable'],
             'status' => ['required', Rule::enum(Status::class)],
         ])->validate();
 
@@ -63,6 +68,7 @@ class DependencyController extends Controller
             'customer_number' => $request['customer_number'],
             'location_id' => $request['location_id'],
             'user_id' => $request['user_id'],
+            'advisor_id' => $request['advisor_id'],
             'status' => $request['status'],
         ]);
 

@@ -9,6 +9,14 @@
     "passwords.throttled": "Please wait before retrying.",
     "passwords.token": "This password reset token is invalid.",
     "passwords.user": "We can't find a user with that email address.",
+    "app.actions": "Actions",
+    "app.confirm_delete": "Are you sure you want to delete this record?",
+    "app.date": "Date",
+    "app.message": "Message",
+    "app.new": "New",
+    "app.readed": "Read",
+    "app.status": "Status",
+    "app.title": "Title",
     "validation.accepted": "The :attribute field must be accepted.",
     "validation.accepted_if": "The :attribute field must be accepted when :other is :value.",
     "validation.active_url": "The :attribute field must be a valid URL.",
@@ -186,5 +194,8 @@
     "pages.register.password": "Password",
     "pages.register.confirmPassword": "Confirm password",
     "pages.register.register": "Register",
-    "pages.register.alreadyRegistered": "Already registered?"
+    "pages.register.alreadyRegistered": "Already registered?",
+    "pages.messages.title": "Messages",
+    "pages.messages.description": "List of received messages",
+    "pages.messages.toast_success_deleted": "The message was successfully deleted"
 }
