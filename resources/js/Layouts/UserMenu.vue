@@ -44,6 +44,17 @@ const isMenuItemActive = (item) => {
     return url !== '#' && page.url.startsWith(url)
 };
 
+const hasAccess = (item) => {
+    const userRoles = page.props.auth?.roles || [];
+    
+    // As a starting point, only Super-Admin can access the Settings menu
+    if (item.title === 'Settings') {
+        return userRoles.includes('Super-Admin');
+    }
+    
+    // Future improvements: check item.roles or item.permissions
+    return true;
+};
 </script>
 
 <template>
@@ -56,29 +67,33 @@ const isMenuItemActive = (item) => {
             <SidebarGroup>
                 <SidebarGroupLabel>Platform</SidebarGroupLabel>
                 <SidebarMenu>
-                    <Collapsible v-for="item in MenuItems" :key="item.title" as-child :default-open="isMenuItemActive(item)" class="group/collapsible">
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger as-child>
-                                <SidebarMenuButton :tooltip="item.title">
-                                    <component :is="item.icon" v-if="item.icon" />
-                                    <span>{{ item.title }}</span>
-                                    <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
+                    <template v-for="item in MenuItems" :key="item.title">
+                        <Collapsible v-if="hasAccess(item)" as-child :default-open="isMenuItemActive(item)" class="group/collapsible">
+                            <SidebarMenuItem>
+                                <CollapsibleTrigger as-child>
+                                    <SidebarMenuButton :tooltip="item.title">
+                                        <component :is="item.icon" v-if="item.icon" />
+                                        <span>{{ item.title }}</span>
+                                        <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                    </SidebarMenuButton>
+                                </CollapsibleTrigger>
 
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem v-for="subItem in item.options" :key="subItem.title" >
-                                        <SidebarMenuSubButton as-child :isActive="isMenuItemActive(subItem)">
-                                            <Link :href="itemUrl(subItem)">
-                                                <span>{{ subItem.title }}</span>
-                                            </Link>
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
+                                <CollapsibleContent>
+                                    <SidebarMenuSub>
+                                        <template v-for="subItem in item.options" :key="subItem.title">
+                                            <SidebarMenuSubItem v-if="hasAccess(subItem)">
+                                                <SidebarMenuSubButton as-child :isActive="isMenuItemActive(subItem)">
+                                                    <Link :href="itemUrl(subItem)">
+                                                        <span>{{ subItem.title }}</span>
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </template>
+                                    </SidebarMenuSub>
+                                </CollapsibleContent>
+                            </SidebarMenuItem>
+                        </Collapsible>
+                    </template>
                 </SidebarMenu>
             </SidebarGroup>
         </SidebarContent>

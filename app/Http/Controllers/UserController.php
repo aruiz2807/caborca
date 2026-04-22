@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->get(['id', 'name', 'email', 'type', 'bpro_user']);
+        $users = User::with('roles')->get(['id', 'name', 'email', 'type', 'bpro_user', 'status']);
         $roles = Role::all(['id', 'name']);
 
         return Inertia::render('Settings/Users/Index', [
@@ -33,6 +33,8 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', Password::default(), 'confirmed'],
             'role' => ['required', 'exists:roles,name'],
+            'type' => ['required', Rule::in(['A', 'G'])],
+            'bpro_user' => ['required_if:type,A', 'nullable', 'string', 'max:5'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
@@ -40,6 +42,8 @@ class UserController extends Controller
             'name' => $request['name'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
+            'type' => $request['type'],
+            'bpro_user' => $request['type'] === 'A' ? $request['bpro_user'] : null,
         ]);
 
         $user->assignRole($request['role']);
@@ -54,18 +58,34 @@ class UserController extends Controller
         Validator::make($request->input(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'bpro_user' => ['required_if:type,A', 'string', 'max:5'],
+            'type' => ['required', Rule::in(['A', 'G'])],
+            'status' => ['required', Rule::enum(\App\Enums\Status::class)],
+            'bpro_user' => ['required_if:type,A', 'nullable', 'string', 'max:5'],
+            'role' => ['required', 'exists:roles,name'],
         ])->validate();
 
         if ($request['email'] !== $user->email && $user instanceof MustVerifyEmail) {
-            $this->updateVerifiedUser($user->id, $request);
+            $user->forceFill([
+                'name' => $request['name'],
+                'email' => $request['email'],
+                'type' => $request['type'],
+                'status' => $request['status'],
+                'bpro_user' => $request['type'] === 'A' ? $request['bpro_user'] : null,
+                'email_verified_at' => null,
+            ])->save();
+
+            $user->sendEmailVerificationNotification();
         } else {
             $user->forceFill([
                 'name' => $request['name'],
                 'email' => $request['email'],
-                'bpro_user' => $request['bpro_user'],
+                'type' => $request['type'],
+                'status' => $request['status'],
+                'bpro_user' => $request['type'] === 'A' ? $request['bpro_user'] : null,
             ])->save();
         }
+
+        $user->syncRoles([$request['role']]);
 
         return to_route('users.index')->with('message', 'stored');
     }

@@ -44,7 +44,7 @@ Route::middleware([
         Route::get('/archive/{status}', [OrderController::class, 'archive_orders'])->name('orders.archive_orders');
     });
 
-    Route::prefix('settings')->group(function () {
+    Route::prefix('settings')->middleware('role:Super-Admin')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name("users.store");
         Route::put('/users/{user}', [UserController::class, 'update'])->name("users.update");
@@ -53,7 +53,8 @@ Route::middleware([
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::post('/roles', [RoleController::class, 'store'])->name("roles.store");
         Route::put('/roles/{role}', [RoleController::class, 'update'])->name("roles.update");
-        Route::delete('/roles/{user}', [RoleController::class, 'destroy'])->name("roles.destroy");
+        Route::put('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name("roles.update_permissions");
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name("roles.destroy");
 
         Route::get('/dependencies', [DependencyController::class, 'index'])->name('dependencies.index');
         Route::post('/dependencies', [DependencyController::class, 'store'])->name("dependencies.store");

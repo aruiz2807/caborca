@@ -1,9 +1,11 @@
 <script setup>
 import { inject } from "vue"
 import { useForm, usePage } from '@inertiajs/vue3';
+import { Card, CardContent } from '@/Components/ui/card'
 import { Button } from '@/Components/ui/button'
 import { Input } from '@/Components/ui/input'
 import { Label } from '@/Components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select'
 import InputError from '@/Components/InputError.vue'
 
@@ -16,6 +18,8 @@ const form = useForm({
     password_confirmation: '',
     terms: false,
     role: '',
+    type: 'A',
+    bpro_user: '',
 });
 
 let openDialog = inject('openDialogState')
@@ -86,7 +90,42 @@ const submit = () => {
             <InputError class="mt-2" :message="form.errors.role" />
         </div>
 
-        <Button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+        <div class="w-full mt-2">
+            <Label for="type">
+                {{ $t("app.type") }}
+            </Label>
+            <Tabs v-model="form.type">
+                <TabsList class="w-full mt-2">
+                    <TabsTrigger class="w-full" value="A">{{ $t("app.advisor") }}</TabsTrigger>
+                    <TabsTrigger class="w-full" value="G">{{ $t("app.government") }}</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="A">
+                    <Card>
+                        <CardContent>
+                            <div class="grid gap-2 pt-4">
+                                <Label for="bpro_user">
+                                    {{ $t("app.bpro_user") }}
+                                </Label>
+                                <Input v-model="form.bpro_user" id="bpro_user" type="text" maxlength="5" placeholder="Usuario del sistema BPro" />
+                                <InputError class="mt-2" :message="form.errors.bpro_user" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="G">
+                    <Card>
+                        <CardContent class="pt-6">
+                            <p class="text-sm text-muted-foreground">Los usuarios gubernamentales no requieren un usuario de BPro.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+            <InputError class="mt-2" :message="form.errors.type" />
+        </div>
+
+        <Button type="submit" class="mt-2" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
             {{ $t("app.save") }}
         </Button>
     </form>

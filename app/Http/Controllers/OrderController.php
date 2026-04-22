@@ -271,6 +271,8 @@ class OrderController extends Controller
     */
     public function store(Request $request)
     {
+        abort_if(!$request->user()->can('create-order'), 403);
+
         Validator::make($request->input(), [
             'purchase_order' => ['required', 'string', 'max:255'],
             'economic_number' => ['required', 'string', 'max:255'],
@@ -365,6 +367,8 @@ class OrderController extends Controller
 
     public function schedule(Request $request, $order_id)
     {
+        abort_if(!$request->user()->can('create-appointment'), 403);
+
         $order = Order::find($order_id);
         $dependency = Dependency::find($order->vehicle_dependency_id);
         $workshop = Workshop::find($request['workshop']);

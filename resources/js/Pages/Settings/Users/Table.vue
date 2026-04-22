@@ -2,7 +2,7 @@
 import { h } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { DataTable, DataTableActionsColumn, DataTableColumnSorting } from '@/Components/data-table'
-import { Trash2, SquarePen} from 'lucide-vue-next';
+import { Trash2, SquarePen, CircleCheck, CircleX } from 'lucide-vue-next';
 import { useTrans } from '/resources/js/Composables/trans';
 import UpdateForm from "./FormUpdate.vue"
 import DeleteForm from "./FormDelete.vue"
@@ -72,6 +72,26 @@ const usersColumns = [
                 title: useTrans('app.bpro_user')
             })
         ),
+    },
+    {
+        accessorKey: 'status',
+        header: ({ column }) => (
+            h(DataTableColumnSorting, {
+                column: column,
+                title: useTrans('app.status')
+            })
+        ),
+        cell: ({ row }) => {
+            const status = row.original.status
+            const isActive = status === 'Active'
+            
+            return h('div', { class: 'flex items-center gap-2' }, [
+                h(isActive ? CircleCheck : CircleX, {
+                    class: isActive ? 'text-green-500 w-4 h-4' : 'text-red-500 w-4 h-4'
+                }),
+                h('span', useTrans(isActive ? 'app.active' : 'app.inactive'))
+            ])
+        }
     },
     {
         id: 'actions',

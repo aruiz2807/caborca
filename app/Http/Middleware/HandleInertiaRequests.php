@@ -40,6 +40,11 @@ class HandleInertiaRequests extends Middleware
         $file = lang_path( "php_" . App::currentLocale() . ".json" );
 
         return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $request->user(),
+                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
+                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+            ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
                 'error' => fn () => $request->session()->get('error')
@@ -48,12 +53,5 @@ class HandleInertiaRequests extends Middleware
             'locales' => config( 'app.available_locales' ),
             'translations' => File::exists( $file ) ? File::json( $file ) : []
         ]);
-
-        /*
-        return [
-            ...parent::share($request),
-            //
-        ];
-        */
     }
 }

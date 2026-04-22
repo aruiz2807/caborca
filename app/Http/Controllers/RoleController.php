@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -12,10 +13,12 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::all(['id', 'name', 'description']);
+        $roles = Role::with('permissions:id,name')->get(['id', 'name', 'description']);
+        $permissions = Permission::all(['id', 'name']);
 
         return Inertia::render('Settings/Roles/Index', [
-            'roles' => $roles
+            'roles' => $roles,
+            'permissions' => $permissions
         ]);
     }
 
@@ -49,6 +52,20 @@ class RoleController extends Controller
             'name' => $request['name'],
             'description' => $request['description'],
         ])->save();
+
+        return to_route('roles.index')->with('message', 'stored');
+    }
+
+    public function updatePermissions(Request $request, $id)
+    {
+        $role = Role::findOrFail($id);
+
+        Validator::make($request->input(), [
+            'permissions' => ['array'],
+            'permissions.*' => ['exists:permissions,name']
+        ])->validate();
+
+        $role->syncPermissions($request->input('permissions', []));
 
         return to_route('roles.index')->with('message', 'stored');
     }

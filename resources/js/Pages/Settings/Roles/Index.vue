@@ -20,15 +20,11 @@ const openDialog = ref(false)
 provide('openDialogState', openDialog);
 
 const showMessage = (message) => {
-    setTimeout(() => {
-        router.visit(route('roles.index'))
-    }, 1250)
-
     if(message === 'stored') {
-        toast.success(useTrans('pages.settings.roles_toast_success_stored'), { duration: 1500 });
+        toast.success(useTrans('pages.settings.roles_toast_success_stored'), { duration: 5000 });
     }
     else if(message === 'deleted') {
-        toast.warning(useTrans('pages.settings.roles_toast_success_deleted'), { duration: 1500 });
+        toast.warning(useTrans('pages.settings.roles_toast_success_deleted'), { duration: 5000 });
     }
 };
 </script>

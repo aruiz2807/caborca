@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+class Role extends SpatieRole
 {
     /**
      * The attributes that are mass assignable.
@@ -16,4 +16,11 @@ class Role extends Model
         'description',
         'guard_name',
     ];
+
+    /**
+     * Set the default guard name.
+     *
+     * @var string
+     */
+    protected $guard_name = 'web';
 }

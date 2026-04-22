@@ -13,16 +13,18 @@ import ServicesCreateDialog from "./DialogCreate.vue"
 const openDialog = ref(false)
 provide('openDialogState', openDialog);
 
-const showMessage = (message) => {
-    setTimeout(() => {
-        router.visit(route('services.index'))
-    }, 1250)
-
-    if(message === 'stored') {
-        toast.success(useTrans('pages.settings.services_toast_success_stored'), { duration: 1500 });
-    }
-    else if(message === 'deleted') {
-        toast.warning(useTrans('pages.settings.services_toast_success_deleted'), { duration: 1500 });
+const showMessage = (message, type = 'success') => {
+    if(type === 'success') {
+        if(message === 'stored') {
+            toast.success(useTrans('pages.settings.services_toast_success_stored'), { duration: 5000 });
+        }
+        else if(message === 'deleted') {
+            toast.warning(useTrans('pages.settings.services_toast_success_deleted'), { duration: 5000 });
+        }
+    } else if (type === 'error') {
+        if(message === 'has-orders') {
+            toast.error(useTrans('app.delete_error'), { duration: 5000 });
+        }
     }
 };
 </script>
@@ -55,6 +57,9 @@ const showMessage = (message) => {
     </UserLayout>
 
     <div v-if="$page.props.flash.message">
-        {{ showMessage($page.props.flash.message) }}
+        {{ showMessage($page.props.flash.message, 'success') }}
+    </div>
+    <div v-if="$page.props.flash.error">
+        {{ showMessage($page.props.flash.error, 'error') }}
     </div>
 </template>

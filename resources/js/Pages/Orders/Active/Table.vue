@@ -30,7 +30,7 @@ const ordersActions = [
         icon: CalendarDays,
         title: useTrans('app.schedule'),
         description: useTrans('pages.orders.schedule_description'),
-        hidden: false,
+        hidden: !page.props.auth.permissions.includes('create-appointment'),
     },
 ]
 const ordersColumns = [

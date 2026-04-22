@@ -45,9 +45,11 @@
     "app.open": "Abrir",
     "app.order": "Orden",
     "app.reschedule": "Reagendar",
+    "app.role": "Rol",
     "app.save": "Guardar",
     "app.schedule": "Agendar",
     "app.service": "Servicio",
+
     "app.service_order": "Orden de servicio",
     "app.service_type": "Tipo de servicio",
     "app.show": "Mostrar",
@@ -84,6 +86,12 @@
     "emails.verify_email_button": "Verificar correo electrónico",
     "emails.verify_email_warning": "Si consideras que no debiste recibir este correo electrónico, por favor ignoralo.",
     "emails.verify_email_trouble": "Si tienes problemas con el botón \"Verificar correo electrónico\", copia y pega la siguiente URL en tu navegador web:",
+
+    "permissions.create-order": "Crear orden de gobierno",
+    "permissions.create-appointment": "Agendar cita de servicio",
+    "permissions.cancel-order": "Cancelar orden de gobierno",
+    "permissions.cancel-appointment": "Cancelar cita de servicio",
+
     "validation.accepted": "El campo :attribute debe aceptarse.",
     "validation.accepted_if": "El campo :attribute debe aceptarse cuando :other es :value.",
     "validation.active_url": "El campo :attribute debe ser una URL válida.",
@@ -347,6 +355,8 @@
     "pages.settings.roles_button_create": "Registrar rol",
     "pages.settings.roles_toast_success_stored": "El rol se almaceno de forma exitosa",
     "pages.settings.roles_toast_success_deleted": "El rol se eliminó de forma exitosa",
+    "pages.settings.roles_permissions_title": "Permisos para el rol",
+    "pages.settings.roles_permissions_description": "Indique los permisos que debe tener el rol seleccionado",
     "pages.settings.locations_title": "Localidades",
     "pages.settings.locations_description": "Catalogo de localidades",
     "pages.settings.locations_update_title": "Actualizar localidad",

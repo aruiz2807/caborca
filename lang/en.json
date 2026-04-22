@@ -166,6 +166,10 @@
         }
     },
     "validation.attributes": [],
+    "permissions.create-order": "Create government order",
+    "permissions.create-appointment": "Schedule service appointment",
+    "permissions.cancel-order": "Cancel government order",
+    "permissions.cancel-appointment": "Cancel service appointment",
     "app.active": "Active",
     "app.inactive": "Inactive",
     "app.delete_error": "The record cannot be deleted because it is being used by other modules.",

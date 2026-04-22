@@ -28,8 +28,8 @@ const rolesActions = [
         name: useTrans('app.permissions'),
         form: PermissionsForm,
         icon: KeyRound,
-        title: useTrans('pages.settings.roles_delete_title'),
-        description: useTrans('pages.settings.roles_delete_description'),
+        title: useTrans('pages.settings.roles_permissions_title'),
+        description: useTrans('pages.settings.roles_permissions_description'),
     }
 ]
 const rolesColumns = [

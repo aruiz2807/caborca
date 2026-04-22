@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -36,7 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'type'
+        'type',
+        'status'
     ];
 
     /**
@@ -61,6 +63,13 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * Set the default guard name.
+     *
+     * @var string
+     */
+    protected $guard_name = 'web';
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -70,6 +79,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => Status::class,
         ];
     }
 
