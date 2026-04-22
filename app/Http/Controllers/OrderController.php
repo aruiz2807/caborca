@@ -53,7 +53,7 @@ class OrderController extends Controller
         // If the current user is not an admin, filter by their assigned dependency
         if (!$user->hasAnyRole(['Admin', 'Super-Admin'])) {
             $query->whereHas('dependency', function ($q) use ($user) {
-                $q->where('advisor_id', $user->id);
+                $q->where('advisor_id', $user->id)->orWhere('user_id', $user->id);
             });
         }
 
