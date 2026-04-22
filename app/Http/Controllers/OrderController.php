@@ -438,7 +438,7 @@ class OrderController extends Controller
         // DELETE request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->delete(config('api.api_url').'/api/dynamic/cita', [
             'base' => $workshop->database,
-            'cita' => $order->appointment,
+            'idcita' => $order->appointment,
         ]);
 
         // Check if the request was successful
