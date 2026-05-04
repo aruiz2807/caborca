@@ -1,7 +1,9 @@
 <script setup>
 import { h } from 'vue'
-import { DataTable, DataTableActionsColumn, DataTableColumnSorting } from '@/Components/data-table'
+import { DataTable, DataTableActionsColumn, DataTableColumnSorting, DataTableTriggerCell } from '@/Components/data-table'
+import { SquarePen } from 'lucide-vue-next';
 import { useTrans } from '/resources/js/Composables/trans';
+import OrderForm from "../Active/FormOrder.vue"
 
 const props = defineProps({
     orders: {
@@ -11,7 +13,13 @@ const props = defineProps({
 })
 
 const ordersActions = [
-
+    {
+        name: useTrans('app.open'),
+        form: OrderForm,
+        icon: SquarePen,
+        title: useTrans('pages.orders.record_title'),
+        description: useTrans('pages.orders.record_description'),
+    },
 ]
 const ordersColumns = [
     {
@@ -22,6 +30,17 @@ const ordersColumns = [
                 title: useTrans('app.purchase_order')
             })
         ),
+        cell: ({ row }) => {
+            const record = props.orders.find(o => o.id === row.original.id)
+            const action = ordersActions[0]
+            
+            return h(DataTableTriggerCell, {
+                record,
+                action,
+                label: row.original.purchase_order,
+                size: '825px'
+            })
+        }
     },
     {
         accessorKey: 'economic_number',

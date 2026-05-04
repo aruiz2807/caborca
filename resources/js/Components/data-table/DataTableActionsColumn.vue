@@ -36,7 +36,7 @@ const showDialog = (formType, formTitle, formDescription) => {
     openDialog.value = true
     form.value = formType
     title.value = formTitle
-    description = formDescription
+    description.value = formDescription
 };
 </script>
 

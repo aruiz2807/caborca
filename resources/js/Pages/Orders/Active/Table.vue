@@ -1,7 +1,7 @@
 <script setup>
 import { h } from 'vue'
 import { usePage } from '@inertiajs/vue3'
-import { DataTable, DataTableActionsColumn, DataTableColumnSorting } from '@/Components/data-table'
+import { DataTable, DataTableActionsColumn, DataTableColumnSorting, DataTableTriggerCell } from '@/Components/data-table'
 import { Trash2, SquarePen, CalendarDays} from 'lucide-vue-next';
 import { useTrans } from '/resources/js/Composables/trans';
 import OrderForm from "./FormOrder.vue"
@@ -42,6 +42,17 @@ const ordersColumns = [
                 title: useTrans('app.purchase_order')
             })
         ),
+        cell: ({ row }) => {
+            const record = page.props.orders[page.props.orders.findIndex(o => o.id === row.original.id)]
+            const action = ordersActions[0]
+            
+            return h(DataTableTriggerCell, {
+                record,
+                action,
+                label: row.original.purchase_order,
+                size: '825px'
+            })
+        }
     },
     {
         accessorKey: 'economic_number',

@@ -35,13 +35,10 @@ const confirmCancel = () => {
 const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-MX', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 const steps = [
@@ -203,7 +200,7 @@ const steps = [
                                                     {{ $t("app.date") }}
                                                 </Label>
                                                 <Label class="font-bold">
-                                                    {{ props.record.appointment_date }}
+                                                    {{ formatDate(props.record.appointment_date) }}
                                                 </Label>
                                             </div>
                                         </div>
@@ -255,7 +252,7 @@ const steps = [
                                                     {{ $t("app.date") }}
                                                 </Label>
                                                 <Label class="font-bold">
-                                                    {{ props.record.service_order_date }}
+                                                    {{ formatDate(props.record.service_order_date) }}
                                                 </Label>
                                             </div>
                                         </div>
