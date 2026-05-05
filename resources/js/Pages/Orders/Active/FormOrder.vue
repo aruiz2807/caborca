@@ -49,21 +49,31 @@ const steps = [
     },
     {
         step: 2,
+        title: useTrans('pages.orders.status_parts'),
+        icon: Truck,
+    },
+    {
+        step: 3,
+        title: useTrans('pages.orders.status_parts_available'),
+        icon: CircleCheckBig,
+    },
+    {
+        step: 4,
         title: useTrans('pages.orders.status_scheduled'),
         icon: CalendarCheck,
     },
     {
-        step: 3,
+        step: 5,
         title: useTrans('pages.orders.status_entered'),
         icon: Truck,
     },
     {
-        step: 4,
+        step: 6,
         title: useTrans('pages.orders.status_finished'),
         icon: CircleCheckBig,
     },
     {
-        step: 5,
+        step: 7,
         title: useTrans('pages.orders.status_no_show'),
         icon: Ban,
     },
@@ -99,8 +109,10 @@ const steps = [
                             class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
                         />
 
-                        <div class="flex flex-col items-center">
-                            <StepperTitle>{{ item.title }}</StepperTitle>
+                        <div class="flex flex-col items-center text-center mt-2">
+                            <StepperTitle class="text-[10px] sm:text-xs leading-tight whitespace-normal break-words w-16 sm:w-20 lg:w-24">
+                                {{ item.title }}
+                            </StepperTitle>
                         </div>
                     </StepperItem>
                 </Stepper>

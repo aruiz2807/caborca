@@ -316,15 +316,65 @@ class OrderController extends Controller
 
         \App\Facades\OrderEvent::log($order, 'Solicitud creada');
 
+        // Immediately transition to PARTS for checking inventory
+        $order->status = OrderStatus::PARTS;
+        $order->save();
+        \App\Facades\OrderEvent::log($order, 'Validación de refacciones', 'Enviado para revisión de refacciones.');
+
         if ($dependency && $dependency->advisor_id) {
             \App\Facades\Message::send(
                 $dependency->advisor_id,
                 'Nueva Orden: ' . $order->purchase_order,
-                'Se ha creado una nueva orden para la dependencia ' . $dependency->name . '. No. Económico: ' . $order->economic_number
+                'Se ha creado una nueva orden para la dependencia ' . $dependency->name . '. No. Económico: ' . $order->economic_number . '. Por favor, revise el inventario de refacciones.'
             );
         }
 
         return to_route('orders.active')->with('message', 'stored');
+    }
+
+    public function update_parts(Request $request, $order_id)
+    {
+        $order = Order::findOrFail($order_id);
+
+        $request->merge([
+            'parts_available' => filter_var($request->parts_available, FILTER_VALIDATE_BOOLEAN)
+        ]);
+
+        Validator::make($request->all(), [
+            'parts_available' => ['required', 'boolean'],
+            'parts_arrival_date' => ['nullable', 'required_if:parts_available,false', 'date'],
+        ])->validate();
+
+        $order->parts_available = $request->parts_available;
+        $order->parts_arrival_date = $request->parts_arrival_date;
+
+        if ($request->parts_available) {
+            $order->status = OrderStatus::PARTS_AVAILABLE;
+            \App\Facades\OrderEvent::log($order, 'Refacciones', 'Las refacciones están disponibles.');
+            
+            if ($order->dependency && $order->dependency->advisor_id) {
+                \App\Facades\Message::send(
+                    $order->dependency->advisor_id,
+                    'Refacciones disponibles para Orden: ' . $order->purchase_order,
+                    'Las refacciones para la orden ' . $order->purchase_order . ' (No. Económico: ' . $order->economic_number . ') ya se encuentran disponibles. La orden está lista para ser agendada.'
+                );
+            }
+        } else {
+            $formattedDate = \Carbon\Carbon::parse($request->parts_arrival_date)->format('d/m/Y');
+            \App\Facades\OrderEvent::log($order, 'Refacciones', "Refacciones llegarán el {$formattedDate}");
+            
+            if ($order->dependency && $order->dependency->user_id) {
+                \App\Facades\Message::send(
+                    $order->dependency->user_id,
+                    'Refacciones para Orden: ' . $order->purchase_order,
+                    'Las refacciones para su orden ' . $order->purchase_order . ' (No. Económico: ' . $order->economic_number . ') llegarán el ' . $formattedDate . '.'
+                );
+            }
+        }
+
+        $order->save();
+
+        return to_route('orders.active')->with('message', 'updated');
     }
 
     public function api_update(Request $request)

@@ -23,7 +23,12 @@ const props = defineProps({
 });
 
 const visibleActions = computed(() =>
-    props.actions.filter(action => !action.hidden)
+    props.actions.filter(action => {
+        if (typeof action.hidden === 'function') {
+            return !action.hidden(props.record);
+        }
+        return !action.hidden;
+    })
 )
 
 let openDialog = ref(false)

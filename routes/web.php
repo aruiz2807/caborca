@@ -47,6 +47,7 @@ Route::middleware([
         Route::post('/store', [OrderController::class, 'store'])->name("orders.store");
         Route::post('/schedule/{order_id}', [OrderController::class, 'schedule'])->name("orders.schedule");
         Route::post('/cancel_appointment/{order_id}', [OrderController::class, 'cancel_appointment'])->name("orders.cancel_appointment");
+        Route::post('/parts/{order_id}', [OrderController::class, 'update_parts'])->name("orders.update_parts");
 
         Route::get('/archive', [OrderController::class, 'archive'])->name('orders.archive');
         Route::get('/archive/{status}', [OrderController::class, 'archive_orders'])->name('orders.archive_orders');

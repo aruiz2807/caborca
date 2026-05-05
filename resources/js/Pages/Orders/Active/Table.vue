@@ -2,13 +2,28 @@
 import { h } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { DataTable, DataTableActionsColumn, DataTableColumnSorting, DataTableTriggerCell } from '@/Components/data-table'
-import { Trash2, SquarePen, CalendarDays} from 'lucide-vue-next';
+import { Trash2, SquarePen, CalendarDays, Wrench } from 'lucide-vue-next';
 import { useTrans } from '/resources/js/Composables/trans';
 import OrderForm from "./FormOrder.vue"
 import DeleteForm from "./FormDelete.vue"
 import ScheduleForm from "./FormSchedule.vue"
+import FormParts from "./FormParts.vue"
 
 const page = usePage()
+
+const getStatusLabel = (status) => {
+    switch (status) {
+        case 1: return useTrans('pages.orders.status_requested');
+        case 2: return useTrans('pages.orders.status_parts');
+        case 3: return useTrans('pages.orders.status_parts_available');
+        case 4: return useTrans('pages.orders.status_scheduled');
+        case 5: return useTrans('pages.orders.status_entered');
+        case 6: return useTrans('pages.orders.status_finished');
+        case 7: return useTrans('pages.orders.status_no_show');
+        default: return 'N/D';
+    }
+}
+
 const ordersActions = [
     {
         name: useTrans('app.open'),
@@ -18,11 +33,12 @@ const ordersActions = [
         description: useTrans('pages.orders.record_description'),
     },
     {
-        name: useTrans('app.delete'),
-        form: DeleteForm,
-        icon: Trash2,
-        title: useTrans('pages.settings.locations_delete_title'),
-        description: useTrans('pages.settings.locations_delete_description'),
+        name: 'Revisar Refacciones',
+        form: FormParts,
+        icon: Wrench,
+        title: 'Revisión de refacciones',
+        description: 'Indique si las refacciones están disponibles o cuándo llegarán.',
+        hidden: (record) => record.status > 3,
     },
     {
         name: useTrans('app.schedule'),
@@ -30,7 +46,14 @@ const ordersActions = [
         icon: CalendarDays,
         title: useTrans('app.schedule'),
         description: useTrans('pages.orders.schedule_description'),
-        hidden: !page.props.auth.permissions.includes('create-appointment'),
+        hidden: (record) => !page.props.auth.permissions.includes('create-appointment') || record.parts_available == 0,
+    },
+    {
+        name: useTrans('app.delete'),
+        form: DeleteForm,
+        icon: Trash2,
+        title: useTrans('pages.settings.locations_delete_title'),
+        description: useTrans('pages.settings.locations_delete_description'),
     },
 ]
 const ordersColumns = [
@@ -109,6 +132,16 @@ const ordersColumns = [
                 title: useTrans('app.service_order')
             })
         ),
+    },
+    {
+        accessorKey: 'status',
+        header: ({ column }) => (
+            h(DataTableColumnSorting, {
+                column: column,
+                title: useTrans('app.status')
+            })
+        ),
+        cell: ({ row }) => getStatusLabel(row.original.status),
     },
     {
         id: 'actions',

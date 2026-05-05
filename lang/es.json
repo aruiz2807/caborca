@@ -309,6 +309,8 @@
     "pages.orders.record_title": "Orden de gobierno",
     "pages.orders.record_description": "Detalle e historico de la orden de gobierno",
     "pages.orders.status_requested": "Solicitada",
+    "pages.orders.status_parts": "Revisión de refacciones",
+    "pages.orders.status_parts_available": "Refacciones disponibles",
     "pages.orders.status_scheduled": "Agendada",
     "pages.orders.status_entered": "Ingresada",
     "pages.orders.status_finished": "Finalizada",

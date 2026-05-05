@@ -43,18 +43,26 @@ const status = [
     },
     {
         id: 2,
-        title: useTrans('pages.orders.status_scheduled'),
+        title: useTrans('pages.orders.status_parts'),
     },
     {
         id: 3,
-        title: useTrans('pages.orders.status_entered'),
+        title: useTrans('pages.orders.status_parts_available'),
     },
     {
         id: 4,
-        title: useTrans('pages.orders.status_finished'),
+        title: useTrans('pages.orders.status_scheduled'),
     },
     {
         id: 5,
+        title: useTrans('pages.orders.status_entered'),
+    },
+    {
+        id: 6,
+        title: useTrans('pages.orders.status_finished'),
+    },
+    {
+        id: 7,
         title: useTrans('pages.orders.status_no_show'),
     },
 ];

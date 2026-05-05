@@ -12,6 +12,19 @@ const props = defineProps({
     }
 })
 
+const getStatusLabel = (status) => {
+    switch (status) {
+        case 1: return useTrans('pages.orders.status_requested');
+        case 2: return useTrans('pages.orders.status_parts');
+        case 3: return useTrans('pages.orders.status_parts_available');
+        case 4: return useTrans('pages.orders.status_scheduled');
+        case 5: return useTrans('pages.orders.status_entered');
+        case 6: return useTrans('pages.orders.status_finished');
+        case 7: return useTrans('pages.orders.status_no_show');
+        default: return 'N/D';
+    }
+}
+
 const ordersActions = [
     {
         name: useTrans('app.open'),
@@ -97,6 +110,16 @@ const ordersColumns = [
                 title: useTrans('app.service_order')
             })
         ),
+    },
+    {
+        accessorKey: 'status',
+        header: ({ column }) => (
+            h(DataTableColumnSorting, {
+                column: column,
+                title: useTrans('app.status')
+            })
+        ),
+        cell: ({ row }) => getStatusLabel(row.original.status),
     },
     {
         id: 'actions',
