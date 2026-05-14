@@ -13,8 +13,23 @@ class SmtpSettingController extends Controller
 {
     public function index()
     {
+        $setting = SmtpSetting::first();
+
         return Inertia::render('Settings/Smtp/Index', [
-            'setting' => SmtpSetting::first(),
+            'setting' => $setting ? [
+                'id' => $setting->id,
+                'provider' => $setting->provider,
+                'host' => $setting->host,
+                'port' => $setting->port,
+                'encryption' => $setting->encryption,
+                'username' => $setting->username,
+                'oauth_tenant_id' => $setting->oauth_tenant_id,
+                'oauth_client_id' => $setting->oauth_client_id,
+                'oauth_mailbox' => $setting->oauth_mailbox,
+                'from_name' => $setting->from_name,
+                'from_email' => $setting->from_email,
+                'active' => $setting->active,
+            ] : null,
         ]);
     }
 

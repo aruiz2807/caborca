@@ -46,18 +46,22 @@ const isMenuItemActive = (item) => {
 
 const hasAccess = (item) => {
     const userRoles = page.props.auth?.roles || [];
+    const userPermissions = page.props.auth?.permissions || [];
     const userType = page.props.auth?.user?.type;
     const isSuperAdmin = userRoles.includes('Super-Admin');
-    
-    // External users (type 'G') cannot see Settings
-    if (item.title === 'Settings' && userType === 'G') {
+
+    if (item.hiddenForExternal && userType === 'G') {
         return false;
     }
 
-    if (item.title === 'Usuarios' || item.title === 'Roles') {
-        return isSuperAdmin;
+    if (item.requiresSuperAdmin && !isSuperAdmin) {
+        return false;
     }
-    
+
+    if (item.requiresPermission && !userPermissions.includes(item.requiresPermission)) {
+        return false;
+    }
+
     return true;
 };
 </script>

@@ -51,7 +51,8 @@ export const MenuItems = [
     },
     {
         title: 'Settings',
-        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*'],
+        hiddenForExternal: true,
+        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*'],
         icon: Settings2,
         options: [
             {
@@ -78,11 +79,19 @@ export const MenuItems = [
                 title: 'Usuarios',
                 routeName: 'users.index',
                 activePatterns: ['users.*'],
+                requiresSuperAdmin: true,
             },
             {
                 title: 'Roles',
                 routeName: 'roles.index',
                 activePatterns: ['roles.*'],
+                requiresSuperAdmin: true,
+            },
+            {
+                title: 'SMTP',
+                routeName: 'smtp.index',
+                activePatterns: ['smtp.*'],
+                requiresSuperAdmin: true,
             },
         ],
     },
