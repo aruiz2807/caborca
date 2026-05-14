@@ -24,6 +24,7 @@ class PermissionSeeder extends Seeder
             'create-dependency',
             'create-workshop',
             'create-service-type',
+            'manage-smtp',
 
             'cancel-order',
             'cancel-appointment',

@@ -6,6 +6,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SmtpSettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkshopController;
 
@@ -65,6 +66,10 @@ Route::middleware([
             Route::put('/roles/{role}', [RoleController::class, 'update'])->name("roles.update");
             Route::put('/roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name("roles.update_permissions");
             Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name("roles.destroy");
+
+            Route::get('/smtp', [SmtpSettingController::class, 'index'])->name('smtp.index');
+            Route::put('/smtp', [SmtpSettingController::class, 'update'])->name('smtp.update');
+            Route::post('/smtp/test', [SmtpSettingController::class, 'test'])->name('smtp.test');
         });
 
         Route::get('/dependencies', [DependencyController::class, 'index'])->name('dependencies.index');
