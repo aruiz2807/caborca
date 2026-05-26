@@ -4,6 +4,8 @@ use App\Http\Controllers\DependencyController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RdpController;
+use App\Http\Controllers\RdpSettingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SmtpSettingController;
@@ -34,6 +36,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::get('/home', [OrderController::class, 'home'])->name('home');
+    Route::get('/rdp', [RdpController::class, 'index'])->name('rdp.index');
 
     Route::prefix('messages')->group(function () {
         Route::get('/', [MessageController::class, 'index'])->name('messages.index');
@@ -70,6 +73,9 @@ Route::middleware([
             Route::get('/smtp', [SmtpSettingController::class, 'index'])->name('smtp.index');
             Route::put('/smtp', [SmtpSettingController::class, 'update'])->name('smtp.update');
             Route::post('/smtp/test', [SmtpSettingController::class, 'test'])->name('smtp.test');
+
+            Route::get('/rdp', [RdpSettingController::class, 'index'])->name('rdp-settings.index');
+            Route::put('/rdp', [RdpSettingController::class, 'update'])->name('rdp-settings.update');
         });
 
         Route::get('/dependencies', [DependencyController::class, 'index'])->name('dependencies.index');
