@@ -9,7 +9,7 @@ export const MenuItems = [
     {
         title: 'Home',
         routeName: 'home',
-        activePatterns: ['home', 'dashboard', 'rdp.*'],
+        activePatterns: ['home', 'dashboard', 'tsplus.*'],
         icon: House,
         options: [
             {
@@ -18,9 +18,9 @@ export const MenuItems = [
                 activePatterns: ['home', 'dashboard'],
             },
             {
-                title: 'RDP',
-                routeName: 'rdp.index',
-                activePatterns: ['rdp.*'],
+                title: 'TSPlus',
+                routeName: 'tsplus.index',
+                activePatterns: ['tsplus.*'],
             }
         ],
     },
@@ -57,7 +57,7 @@ export const MenuItems = [
     {
         title: 'Settings',
         hiddenForExternal: true,
-        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*', 'rdp-settings.*'],
+        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*', 'tsplus-settings.*'],
         icon: Settings2,
         options: [
             {
@@ -99,9 +99,9 @@ export const MenuItems = [
                 requiresSuperAdmin: true,
             },
             {
-                title: 'RDP',
-                routeName: 'rdp-settings.index',
-                activePatterns: ['rdp-settings.*'],
+                title: 'TSPlus',
+                routeName: 'tsplus-settings.index',
+                activePatterns: ['tsplus-settings.*'],
                 requiresSuperAdmin: true,
             },
         ],

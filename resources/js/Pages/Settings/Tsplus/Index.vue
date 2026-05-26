@@ -32,30 +32,30 @@ const form = useForm({
 })
 
 watch(() => page.props.flash?.message, (message) => {
-    if (message === 'rdp-stored') {
-        toast.success('URL de RDP actualizada correctamente.', { duration: 5000 })
+    if (message === 'tsplus-stored') {
+        toast.success('URL de TSPlus actualizada correctamente.', { duration: 5000 })
     }
 }, { immediate: true })
 
 const submit = () => {
-    form.put(route('rdp-settings.update'), {
+    form.put(route('tsplus-settings.update'), {
         preserveScroll: true,
     })
 }
 </script>
 
 <template>
-    <UserLayout tabTitle="RDP" appName="Settings">
+    <UserLayout tabTitle="TSPlus" appName="Settings">
         <div class="max-w-6xl mx-auto py-10 sm:px-6 lg:px-8">
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
                 <Card>
                     <CardHeader>
                         <CardTitle class="flex items-center gap-2">
                             <Globe class="h-5 w-5" />
-                            Configuracion de RDP
+                            Configuracion de TSPlus
                         </CardTitle>
                         <CardDescription class="mt-2">
-                            Define la direccion que se mostrara dentro de la opcion <span class="font-medium">Home / RDP</span>.
+                            Define la direccion que se mostrara dentro de la opcion <span class="font-medium">Home / TSPlus</span>.
                         </CardDescription>
                     </CardHeader>
 
@@ -67,7 +67,7 @@ const submit = () => {
                                     id="url"
                                     v-model="form.url"
                                     type="url"
-                                    placeholder="https://rdp.tu-dominio.com/"
+                                    placeholder="https://tsplus.tu-dominio.com/"
                                 />
                                 <p class="text-xs text-muted-foreground">
                                     Usa una URL completa con <span class="font-medium">http://</span> o <span class="font-medium">https://</span>.
@@ -93,7 +93,7 @@ const submit = () => {
                                 Vista esperada
                             </CardTitle>
                             <CardDescription>
-                                La pagina <span class="font-medium">RDP</span> abrira esta direccion dentro de un iframe ajustado al area visible del sistema.
+                                La pagina <span class="font-medium">TSPlus</span> abrira esta direccion dentro de un iframe ajustado al area visible del sistema.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

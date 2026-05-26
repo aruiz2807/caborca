@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
-class RdpSetting extends Model
+class TsplusSetting extends Model
 {
     use HasFactory;
+
+    protected $table = 'rdp_settings';
 
     protected $fillable = [
         'url',
@@ -21,7 +23,7 @@ class RdpSetting extends Model
             return null;
         }
 
-        return Cache::remember('rdp.setting.current', 60, fn () => static::query()->first());
+        return Cache::remember('tsplus.setting.current', 60, fn () => static::query()->first());
     }
 
     public static function configuredUrl(): ?string
@@ -31,6 +33,6 @@ class RdpSetting extends Model
 
     public static function forgetCurrent(): void
     {
-        Cache::forget('rdp.setting.current');
+        Cache::forget('tsplus.setting.current');
     }
 }

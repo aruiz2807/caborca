@@ -4,11 +4,11 @@ use App\Http\Controllers\DependencyController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\RdpController;
-use App\Http\Controllers\RdpSettingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SmtpSettingController;
+use App\Http\Controllers\TsplusController;
+use App\Http\Controllers\TsplusSettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkshopController;
 
@@ -36,7 +36,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::get('/home', [OrderController::class, 'home'])->name('home');
-    Route::get('/rdp', [RdpController::class, 'index'])->name('rdp.index');
+    Route::get('/tsplus', [TsplusController::class, 'index'])->name('tsplus.index');
 
     Route::prefix('messages')->group(function () {
         Route::get('/', [MessageController::class, 'index'])->name('messages.index');
@@ -74,8 +74,8 @@ Route::middleware([
             Route::put('/smtp', [SmtpSettingController::class, 'update'])->name('smtp.update');
             Route::post('/smtp/test', [SmtpSettingController::class, 'test'])->name('smtp.test');
 
-            Route::get('/rdp', [RdpSettingController::class, 'index'])->name('rdp-settings.index');
-            Route::put('/rdp', [RdpSettingController::class, 'update'])->name('rdp-settings.update');
+            Route::get('/tsplus', [TsplusSettingController::class, 'index'])->name('tsplus-settings.index');
+            Route::put('/tsplus', [TsplusSettingController::class, 'update'])->name('tsplus-settings.update');
         });
 
         Route::get('/dependencies', [DependencyController::class, 'index'])->name('dependencies.index');
