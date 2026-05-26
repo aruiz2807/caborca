@@ -24,6 +24,10 @@ import {
 defineProps({
     tabTitle: String,
     appName: String,
+    panelClass: {
+        type: String,
+        default: 'min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min',
+    },
 });
 
 const mode = useColorMode()
@@ -80,7 +84,7 @@ const mode = useColorMode()
                 </div>
             </header>
             <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-                <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+                <div :class="panelClass">
                     <slot />
                 </div>
             </div>

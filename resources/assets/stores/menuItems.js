@@ -9,13 +9,18 @@ export const MenuItems = [
     {
         title: 'Home',
         routeName: 'home',
-        activePatterns: ['home', 'dashboard'],
+        activePatterns: ['home', 'dashboard', 'rdp.*'],
         icon: House,
         options: [
             {
                 title: 'Dashboard',
                 routeName: 'home',
                 activePatterns: ['home', 'dashboard'],
+            },
+            {
+                title: 'RDP',
+                routeName: 'rdp.index',
+                activePatterns: ['rdp.*'],
             }
         ],
     },
