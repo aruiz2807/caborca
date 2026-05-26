@@ -52,7 +52,7 @@ export const MenuItems = [
     {
         title: 'Settings',
         hiddenForExternal: true,
-        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*'],
+        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*', 'rdp-settings.*'],
         icon: Settings2,
         options: [
             {
@@ -91,6 +91,12 @@ export const MenuItems = [
                 title: 'SMTP',
                 routeName: 'smtp.index',
                 activePatterns: ['smtp.*'],
+                requiresSuperAdmin: true,
+            },
+            {
+                title: 'RDP',
+                routeName: 'rdp-settings.index',
+                activePatterns: ['rdp-settings.*'],
                 requiresSuperAdmin: true,
             },
         ],
