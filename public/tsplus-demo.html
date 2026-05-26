@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TSPlus Demo</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f4f1ea;
+            --panel: #ffffff;
+            --text: #171717;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --accent-soft: #dbeafe;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32%),
+                linear-gradient(180deg, #faf8f4 0%, var(--bg) 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .shell {
+            width: min(960px, 100%);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.10);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            background: #fcfcfd;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #d1d5db;
+        }
+
+        .dot:first-child {
+            background: #ef4444;
+        }
+
+        .dot:nth-child(2) {
+            background: #f59e0b;
+        }
+
+        .dot:nth-child(3) {
+            background: #22c55e;
+        }
+
+        .content {
+            padding: 48px 32px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 18px 0 12px;
+            font-size: clamp(32px, 6vw, 58px);
+            line-height: 0.98;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+            max-width: 60ch;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            background: #fff;
+        }
+
+        .card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .card span {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .button.primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+        }
+
+        .button.secondary {
+            background: #fff;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.95em;
+            color: #0f172a;
+            background: #f8fafc;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 32px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <div class="topbar" aria-hidden="true">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <section class="content">
+            <span class="eyebrow">TSPlus Demo</span>
+            <h1>Pantalla temporal de TSPlus</h1>
+            <p>
+                Esta pagina funciona como placeholder mientras se define la URL final de TSPlus.
+                Si puedes verla dentro del modulo, entonces el iframe ya esta funcionando
+                correctamente y solo faltaria sustituir esta direccion por la del cliente.
+            </p>
+
+            <div class="grid">
+                <article class="card">
+                    <strong>Uso inmediato</strong>
+                    <span>Guarda esta direccion en Settings / TSPlus y valida que la carga interna funcione.</span>
+                </article>
+
+                <article class="card">
+                    <strong>Sin dependencias</strong>
+                    <span>Es un archivo estatico local, asi que no depende de rutas de Laravel ni de servicios externos.</span>
+                </article>
+
+                <article class="card">
+                    <strong>Siguiente paso</strong>
+                    <span>Cuando tengas la URL real, solo reemplazala en la configuracion del sistema.</span>
+                </article>
+            </div>
+
+            <div class="actions">
+                <a class="button primary" href="/" target="_top">Ir al inicio</a>
+                <a class="button secondary" href="javascript:window.location.reload()">Recargar vista</a>
+            </div>
+
+            <p class="footer">
+                Archivo sugerido para pruebas: <code>public/tsplus-demo.html</code>
+            </p>
+        </section>
+    </main>
+</body>
+</html>
