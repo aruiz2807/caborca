@@ -3,6 +3,7 @@
 use App\Models\Role;
 use App\Models\TsplusSetting;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
 
 test('super admin can view tsplus settings page', function () {
     $user = User::factory()->create();
@@ -39,12 +40,15 @@ test('super admin can store tsplus url', function () {
     expect($setting->url)->toBe('https://tsplus.caborca.test/session');
 });
 
-test('authenticated user can view tsplus page', function () {
+test('authenticated user with view-tsplus permission can view tsplus page', function () {
+    $this->seed(PermissionSeeder::class);
+
     TsplusSetting::query()->create([
         'url' => 'https://tsplus.caborca.test/session',
     ]);
 
     $user = User::factory()->create();
+    $user->givePermissionTo('view-tsplus');
 
     $response = $this->actingAs($user)->get(route('tsplus.index'));
 
