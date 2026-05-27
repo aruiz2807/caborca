@@ -27,10 +27,38 @@ const permissionGroups = computed(() => {
     return [];
 });
 
+const compatibilityRules = computed(() => {
+    if (!Array.isArray(page.props.permissionCompatibilityRules)) {
+        return [];
+    }
+
+    return page.props.permissionCompatibilityRules;
+});
+
 // Initialize form with the role's current permissions
 const form = useForm({
     permissions: props.record.permissions ? props.record.permissions.map(p => p.name) : []
 });
+
+const applyCompatibilityRules = () => {
+    const selectedPermissions = new Set(form.permissions);
+
+    for (const rule of compatibilityRules.value) {
+        const ifAny = Array.isArray(rule?.if_any) ? rule.if_any : [];
+        const grant = Array.isArray(rule?.grant) ? rule.grant : [];
+        const hasTriggerPermission = ifAny.some(permissionName => selectedPermissions.has(permissionName));
+
+        if (!hasTriggerPermission) {
+            continue;
+        }
+
+        for (const permissionName of grant) {
+            selectedPermissions.add(permissionName);
+        }
+    }
+
+    form.permissions = Array.from(selectedPermissions);
+};
 
 // Watch for changes to the record (e.g., after an Inertia refresh or when opening a different role)
 watch(() => props.record, (newRecord) => {
@@ -39,6 +67,8 @@ watch(() => props.record, (newRecord) => {
     } else {
         form.permissions = [];
     }
+
+    applyCompatibilityRules();
 }, { deep: true, immediate: true });
 
 let openDialog = inject('openDialogState')
@@ -50,9 +80,13 @@ const togglePermission = (permissionName) => {
     } else {
         form.permissions.splice(index, 1);
     }
+
+    applyCompatibilityRules();
 };
 
 const submit = () => {
+    applyCompatibilityRules();
+
     form.put(route('roles.update_permissions', props.record.id), {
         onSuccess: () => {
             openDialog.value = false

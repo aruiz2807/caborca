@@ -53,10 +53,33 @@ class RoleController extends Controller
             ]);
         }
 
+        $permissionCompatibilityRules = collect(config('permission_compatibility_map.rules', []))
+            ->filter(fn ($rule) => is_array($rule))
+            ->map(function (array $rule) {
+                $ifAny = collect($rule['if_any'] ?? [])
+                    ->filter(fn ($permissionName) => is_string($permissionName) && $permissionName !== '')
+                    ->values()
+                    ->all();
+
+                $grant = collect($rule['grant'] ?? [])
+                    ->filter(fn ($permissionName) => is_string($permissionName) && $permissionName !== '')
+                    ->values()
+                    ->all();
+
+                return [
+                    'if_any' => $ifAny,
+                    'grant' => $grant,
+                ];
+            })
+            ->filter(fn (array $rule) => !empty($rule['if_any']) && !empty($rule['grant']))
+            ->values()
+            ->all();
+
         return Inertia::render('Settings/Roles/Index', [
             'roles' => $roles,
             'permissions' => $permissions,
             'permissionGroups' => $permissionGroups,
+            'permissionCompatibilityRules' => $permissionCompatibilityRules,
         ]);
     }
 
