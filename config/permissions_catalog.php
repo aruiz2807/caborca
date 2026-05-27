@@ -30,7 +30,7 @@ return [
             ],
         ],
         'settings_locations' => [
-            'label' => 'Settings - Localidades',
+            'label' => 'Settings / Localidades',
             'permissions' => [
                 'view-locations',
                 'create-location',
@@ -39,7 +39,7 @@ return [
             ],
         ],
         'settings_dependencies' => [
-            'label' => 'Settings - Dependencias',
+            'label' => 'Settings / Dependencias',
             'permissions' => [
                 'view-dependencies',
                 'create-dependency',
@@ -48,7 +48,7 @@ return [
             ],
         ],
         'settings_workshops' => [
-            'label' => 'Settings - Talleres',
+            'label' => 'Settings / Talleres',
             'permissions' => [
                 'view-workshops',
                 'create-workshop',
@@ -57,7 +57,7 @@ return [
             ],
         ],
         'settings_services' => [
-            'label' => 'Settings - Servicios',
+            'label' => 'Settings / Servicios',
             'permissions' => [
                 'view-services',
                 'create-service-type',
@@ -66,7 +66,7 @@ return [
             ],
         ],
         'settings_users' => [
-            'label' => 'Settings - Usuarios',
+            'label' => 'Settings / Usuarios',
             'permissions' => [
                 'view-users',
                 'create-user',
@@ -75,7 +75,7 @@ return [
             ],
         ],
         'settings_roles' => [
-            'label' => 'Settings - Roles',
+            'label' => 'Settings / Roles',
             'permissions' => [
                 'view-roles',
                 'create-role',
@@ -85,14 +85,14 @@ return [
             ],
         ],
         'settings_smtp' => [
-            'label' => 'Settings - SMTP',
+            'label' => 'Settings / SMTP',
             'permissions' => [
                 'view-smtp',
                 'manage-smtp',
             ],
         ],
         'settings_tsplus' => [
-            'label' => 'Settings - TSPlus',
+            'label' => 'Settings / TSPlus',
             'permissions' => [
                 'view-tsplus-settings',
                 'manage-tsplus-settings',

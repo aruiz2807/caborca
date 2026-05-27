@@ -1,5 +1,5 @@
 <script setup>
-import { inject, watch } from "vue"
+import { computed, inject, watch } from "vue"
 import { useForm, usePage } from '@inertiajs/vue3';
 import { Button } from '@/Components/ui/button'
 import { Label } from '@/Components/ui/label'
@@ -10,6 +10,22 @@ const props = defineProps({
 });
 
 const page = usePage();
+
+const permissionGroups = computed(() => {
+    if (Array.isArray(page.props.permissionGroups) && page.props.permissionGroups.length > 0) {
+        return page.props.permissionGroups;
+    }
+
+    if (Array.isArray(page.props.permissions) && page.props.permissions.length > 0) {
+        return [{
+            key: 'all',
+            label: 'Permisos',
+            permissions: page.props.permissions,
+        }];
+    }
+
+    return [];
+});
 
 // Initialize form with the role's current permissions
 const form = useForm({
@@ -50,19 +66,27 @@ const submit = () => {
         <div class="grid gap-2 mb-4">
             <h3 class="text-sm font-medium leading-none mb-2">{{ $t('app.permissions') }}</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto p-2 border rounded-md">
-                <div v-for="permission in page.props.permissions" :key="permission.id" class="flex items-center space-x-2">
-                    <Checkbox 
-                        :id="`permission-${permission.id}`" 
-                        :model-value="form.permissions.includes(permission.name)"
-                        @update:modelValue="togglePermission(permission.name)"
-                    />
-                    <Label :for="`permission-${permission.id}`" class="text-sm font-normal">
-                        {{ $t('permissions.' + permission.name) }}
-                    </Label>
+            <div class="max-h-[340px] overflow-y-auto p-2 border rounded-md space-y-5">
+                <div v-for="group in permissionGroups" :key="group.key" class="space-y-3">
+                    <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {{ group.label }}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div v-for="permission in group.permissions" :key="permission.id" class="flex items-center space-x-2">
+                            <Checkbox 
+                                :id="`permission-${permission.id}`" 
+                                :model-value="form.permissions.includes(permission.name)"
+                                @update:modelValue="togglePermission(permission.name)"
+                            />
+                            <Label :for="`permission-${permission.id}`" class="text-sm font-normal">
+                                {{ $t('permissions.' + permission.name) }}
+                            </Label>
+                        </div>
+                    </div>
                 </div>
                 
-                <div v-if="!page.props.permissions?.length" class="text-sm text-muted-foreground col-span-2">
+                <div v-if="!permissionGroups.length" class="text-sm text-muted-foreground">
                     No hay permisos disponibles.
                 </div>
             </div>

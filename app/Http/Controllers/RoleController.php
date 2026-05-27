@@ -14,11 +14,48 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions:id,name')->get(['id', 'name', 'description']);
-        $permissions = Permission::all(['id', 'name']);
+        $permissions = Permission::orderBy('name')->get(['id', 'name']);
+
+        $configuredGroups = collect(config('permissions_catalog.groups', []));
+        $permissionsByName = $permissions->keyBy('name');
+        $configuredPermissionNames = $configuredGroups
+            ->flatMap(fn (array $group) => $group['permissions'] ?? [])
+            ->unique()
+            ->values();
+
+        $permissionGroups = $configuredGroups
+            ->map(function (array $group, string $key) use ($permissionsByName) {
+                $groupPermissions = collect($group['permissions'] ?? [])
+                    ->map(fn (string $permissionName) => $permissionsByName->get($permissionName))
+                    ->filter()
+                    ->values()
+                    ->all();
+
+                return [
+                    'key' => $key,
+                    'label' => $group['label'] ?? $key,
+                    'permissions' => $groupPermissions,
+                ];
+            })
+            ->filter(fn (array $group) => !empty($group['permissions']))
+            ->values();
+
+        $ungroupedPermissions = $permissions
+            ->filter(fn (Permission $permission) => !$configuredPermissionNames->contains($permission->name))
+            ->values();
+
+        if ($ungroupedPermissions->isNotEmpty()) {
+            $permissionGroups->push([
+                'key' => 'other',
+                'label' => 'Otros',
+                'permissions' => $ungroupedPermissions->all(),
+            ]);
+        }
 
         return Inertia::render('Settings/Roles/Index', [
             'roles' => $roles,
-            'permissions' => $permissions
+            'permissions' => $permissions,
+            'permissionGroups' => $permissionGroups,
         ]);
     }
 
