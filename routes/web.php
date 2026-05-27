@@ -12,18 +12,17 @@ use App\Http\Controllers\TsplusSettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkshopController;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
+
+    return Inertia::render('Auth/Login/Index');
 })->name('welcome');
 
 Route::middleware([
