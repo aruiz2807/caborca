@@ -137,6 +137,8 @@
     "permissions.manage-smtp": "Gestionar configuración SMTP",
     "permissions.view-tsplus-settings": "Ver configuración de TSPlus",
     "permissions.manage-tsplus-settings": "Gestionar configuración de TSPlus",
+    "permissions.view-bi-settings": "Ver configuración de BI",
+    "permissions.manage-bi-settings": "Gestionar configuración de BI",
 
     "validation.accepted": "El campo :attribute debe aceptarse.",
     "validation.accepted_if": "El campo :attribute debe aceptarse cuando :other es :value.",

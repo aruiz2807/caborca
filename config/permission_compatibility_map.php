@@ -46,5 +46,9 @@ return [
             'if_any' => ['manage-tsplus-settings'],
             'grant' => ['view-tsplus-settings'],
         ],
+        [
+            'if_any' => ['manage-bi-settings'],
+            'grant' => ['view-bi-settings'],
+        ],
     ],
 ];

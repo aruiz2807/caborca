@@ -218,6 +218,8 @@
     "permissions.manage-smtp": "Manage SMTP settings",
     "permissions.view-tsplus-settings": "View TSPlus settings",
     "permissions.manage-tsplus-settings": "Manage TSPlus settings",
+    "permissions.view-bi-settings": "View BI settings",
+    "permissions.manage-bi-settings": "Manage BI settings",
     "app.active": "Active",
     "app.inactive": "Inactive",
     "app.delete_error": "The record cannot be deleted because it is being used by other modules.",

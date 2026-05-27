@@ -98,5 +98,12 @@ return [
                 'manage-tsplus-settings',
             ],
         ],
+        'settings_bi' => [
+            'label' => 'Settings / BI',
+            'permissions' => [
+                'view-bi-settings',
+                'manage-bi-settings',
+            ],
+        ],
     ],
 ];
