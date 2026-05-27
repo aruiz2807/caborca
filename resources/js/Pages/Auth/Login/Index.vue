@@ -7,7 +7,7 @@ import brands from '../../../../assets/images/brands.png'
 <template>
     <Head title="Login" />
     <div class="relative min-h-svh overflow-hidden bg-slate-100">
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.14),_transparent_58%)]" />
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(0,114,206,0.14),_transparent_58%)]" />
         <div class="mx-auto flex min-h-svh w-full max-w-6xl items-center px-6 py-10 md:px-10">
             <div class="grid w-full items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
                 <section class="order-2 lg:order-1">
