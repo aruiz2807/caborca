@@ -16,24 +16,12 @@ class PermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define permissions
-        $permissions = [
-            'create-order',
-            'create-appointment',
-            'create-location',
-            'create-dependency',
-            'create-workshop',
-            'create-service-type',
-            'manage-smtp',
-
-            'cancel-order',
-            'cancel-appointment',
-            
-            'delete-location',
-            'delete-dependency',
-            'delete-workshop',
-            'delete-service-type',            
-        ];
+        $permissions = collect(config('permissions_catalog.groups', []))
+            ->flatMap(fn (array $group) => $group['permissions'] ?? [])
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
