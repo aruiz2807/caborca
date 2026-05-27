@@ -334,6 +334,8 @@ class OrderController extends Controller
 
     public function update_parts(Request $request, $order_id)
     {
+        abort_if(!$request->user()->can('update-order-parts'), 403);
+
         $order = Order::findOrFail($order_id);
 
         $request->merge([
