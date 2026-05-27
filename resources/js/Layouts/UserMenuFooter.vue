@@ -69,12 +69,12 @@ const { isMobile } = useSidebar()
                         <DropdownMenuItem>
                             <CircleUserRound />
                             <Link :href="route('profile.show')">
-                                Profile
+                                {{ $t('app.profile') }}
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Bell />
-                            Notifications
+                            {{ $t('app.notifications') }}
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
 
@@ -83,7 +83,7 @@ const { isMobile } = useSidebar()
                     <DropdownMenuItem>
                         <LogOut />
                         <Link :href="route('logout')" method="post" as="button">
-                            Logout
+                            {{ $t('app.logout') }}
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
