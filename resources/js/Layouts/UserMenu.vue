@@ -64,6 +64,14 @@ const hasAccess = (item) => {
 
     return true;
 };
+
+const hasVisibleOptions = (item) => {
+    if (!item.options?.length) {
+        return true;
+    }
+
+    return item.options.some((option) => hasAccess(option));
+};
 </script>
 
 <template>
@@ -77,7 +85,7 @@ const hasAccess = (item) => {
                 <SidebarGroupLabel>Platform</SidebarGroupLabel>
                 <SidebarMenu>
                     <template v-for="item in MenuItems" :key="item.title">
-                        <Collapsible v-if="hasAccess(item)" as-child :default-open="isMenuItemActive(item)" class="group/collapsible">
+                        <Collapsible v-if="hasAccess(item) && hasVisibleOptions(item)" as-child :default-open="isMenuItemActive(item)" class="group/collapsible">
                             <SidebarMenuItem>
                                 <CollapsibleTrigger as-child>
                                     <SidebarMenuButton :tooltip="item.title">
