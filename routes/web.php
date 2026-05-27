@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DependencyController;
+use App\Http\Controllers\BiSettingController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
@@ -130,6 +131,28 @@ Route::middleware([
         Route::put('/tsplus', [TsplusSettingController::class, 'update'])
             ->middleware('permission:manage-tsplus-settings')
             ->name('tsplus-settings.update');
+
+        Route::get('/bi', [BiSettingController::class, 'index'])
+            ->middleware('permission:view-bi-settings')
+            ->name('bi-settings.index');
+        Route::post('/bi/sections', [BiSettingController::class, 'storeSection'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.sections.store');
+        Route::put('/bi/sections/{biSection}', [BiSettingController::class, 'updateSection'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.sections.update');
+        Route::delete('/bi/sections/{biSection}', [BiSettingController::class, 'destroySection'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.sections.destroy');
+        Route::post('/bi/reports', [BiSettingController::class, 'storeReport'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.reports.store');
+        Route::put('/bi/reports/{biReport}', [BiSettingController::class, 'updateReport'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.reports.update');
+        Route::delete('/bi/reports/{biReport}', [BiSettingController::class, 'destroyReport'])
+            ->middleware('permission:manage-bi-settings')
+            ->name('bi-settings.reports.destroy');
 
         Route::get('/dependencies', [DependencyController::class, 'index'])
             ->middleware('permission:view-dependencies')

@@ -63,7 +63,7 @@ export const MenuItems = [
     {
         title: 'Settings',
         hiddenForExternal: true,
-        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*', 'tsplus-settings.*'],
+        activePatterns: ['users.*', 'roles.*', 'dependencies.*', 'locations.*', 'workshops.*', 'services.*', 'smtp.*', 'tsplus-settings.*', 'bi-settings.*'],
         icon: Settings2,
         options: [
             {
@@ -113,6 +113,12 @@ export const MenuItems = [
                 routeName: 'tsplus-settings.index',
                 activePatterns: ['tsplus-settings.*'],
                 requiresPermission: 'view-tsplus-settings',
+            },
+            {
+                title: 'BI',
+                routeName: 'bi-settings.index',
+                activePatterns: ['bi-settings.*'],
+                requiresPermission: 'view-bi-settings',
             },
         ],
     },
