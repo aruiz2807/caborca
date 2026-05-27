@@ -186,9 +186,9 @@ const destroyReport = (report) => {
 
 <template>
     <UserLayout tabTitle="BI" appName="Settings">
-        <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto overflow-x-hidden py-10 sm:px-6 lg:px-8">
             <div class="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-                <Card>
+                <Card class="min-w-0">
                     <CardHeader>
                         <CardTitle class="flex items-center gap-2">
                             <FolderTree class="h-5 w-5" />
@@ -227,16 +227,16 @@ const destroyReport = (report) => {
 
                             <div v-for="section in sections" :key="section.id" class="rounded-lg border p-4">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p class="font-medium text-foreground">{{ section.name }}</p>
-                                        <p class="text-xs text-muted-foreground">Slug: {{ section.slug }}</p>
-                                        <p class="text-xs text-muted-foreground">Permiso: {{ section.permission_name }}</p>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate font-medium text-foreground">{{ section.name }}</p>
+                                        <p class="truncate text-xs text-muted-foreground">Slug: {{ section.slug }}</p>
+                                        <p class="truncate text-xs text-muted-foreground">Permiso: {{ section.permission_name }}</p>
                                         <p class="mt-2 text-xs text-muted-foreground">
                                             {{ section.reports.length }} panel(es) registrado(s)
                                         </p>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex shrink-0 items-center gap-2">
                                         <Button type="button" size="sm" variant="secondary" @click="editSection(section)">
                                             Editar
                                         </Button>
@@ -251,8 +251,8 @@ const destroyReport = (report) => {
                     </CardContent>
                 </Card>
 
-                <div class="grid gap-6">
-                    <Card>
+                <div class="grid min-w-0 gap-6">
+                    <Card class="min-w-0">
                         <CardHeader>
                             <CardTitle class="flex items-center gap-2">
                                 <Shield class="h-5 w-5" />
@@ -336,7 +336,7 @@ const destroyReport = (report) => {
                                                 />
                                                 <Label :for="`user-${user.id}`" class="font-normal leading-tight">
                                                     <span class="block">{{ user.name }}</span>
-                                                    <span class="text-xs text-muted-foreground">{{ user.email }}</span>
+                                                    <span class="break-all text-xs text-muted-foreground">{{ user.email }}</span>
                                                 </Label>
                                             </div>
                                         </div>
@@ -357,7 +357,7 @@ const destroyReport = (report) => {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card class="min-w-0">
                         <CardHeader>
                             <CardTitle>Paneles registrados</CardTitle>
                             <CardDescription>
@@ -369,28 +369,28 @@ const destroyReport = (report) => {
                                 Crea primero una seccion para comenzar.
                             </div>
 
-                            <div v-for="section in sections" :key="`reports-${section.id}`" class="mb-4 rounded-lg border p-4">
+                            <div v-for="section in sections" :key="`reports-${section.id}`" class="mb-4 min-w-0 rounded-lg border p-4">
                                 <div class="mb-3">
                                     <p class="font-medium text-foreground">{{ section.name }}</p>
-                                    <p class="text-xs text-muted-foreground">Permiso: {{ section.permission_name }}</p>
+                                    <p class="break-all text-xs text-muted-foreground">Permiso: {{ section.permission_name }}</p>
                                 </div>
 
                                 <div v-if="!section.reports.length" class="text-sm text-muted-foreground">
                                     Esta seccion aun no tiene paneles.
                                 </div>
 
-                                <div v-for="report in section.reports" :key="report.id" class="mb-3 rounded-md border bg-muted/20 p-3 last:mb-0">
+                                <div v-for="report in section.reports" :key="report.id" class="mb-3 min-w-0 rounded-md border bg-muted/20 p-3 last:mb-0">
                                     <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
+                                        <div class="min-w-0 flex-1">
                                             <p class="font-medium text-foreground">{{ report.name }}</p>
-                                            <p class="truncate text-xs text-muted-foreground">{{ report.embed_url }}</p>
-                                            <p class="mt-1 text-xs text-muted-foreground">Permiso: {{ report.permission_name }}</p>
+                                            <p class="break-all text-xs text-muted-foreground">{{ report.embed_url }}</p>
+                                            <p class="mt-1 break-all text-xs text-muted-foreground">Permiso: {{ report.permission_name }}</p>
                                             <p class="text-xs text-muted-foreground">
                                                 Roles: {{ report.role_ids.length }} | Usuarios: {{ report.user_ids.length }}
                                             </p>
                                         </div>
 
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex shrink-0 items-center gap-2">
                                             <Button type="button" size="sm" variant="secondary" @click="editReport(report)">
                                                 Editar
                                             </Button>
@@ -419,4 +419,3 @@ const destroyReport = (report) => {
         <Toaster rich-colors position="top-right" />
     </UserLayout>
 </template>
-
