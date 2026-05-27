@@ -15,6 +15,7 @@ const usersActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.users_update_title'),
         description: useTrans('pages.settings.users_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-user'),
     },
     {
         name: useTrans('app.delete'),
@@ -22,6 +23,7 @@ const usersActions = [
         icon: Trash2,
         title: useTrans('pages.settings.users_delete_title'),
         description: useTrans('pages.settings.users_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-user'),
     }
 ]
 const usersColumns = [

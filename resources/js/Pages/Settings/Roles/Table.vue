@@ -16,6 +16,7 @@ const rolesActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.roles_update_title'),
         description: useTrans('pages.settings.roles_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-role'),
     },
     {
         name: useTrans('app.delete'),
@@ -23,6 +24,7 @@ const rolesActions = [
         icon: Trash2,
         title: useTrans('pages.settings.roles_delete_title'),
         description: useTrans('pages.settings.roles_delete_description'),
+        hidden: !page.props.auth.permissions.includes('delete-role'),
     },
     {
         name: useTrans('app.permissions'),
@@ -30,6 +32,7 @@ const rolesActions = [
         icon: KeyRound,
         title: useTrans('pages.settings.roles_permissions_title'),
         description: useTrans('pages.settings.roles_permissions_description'),
+        hidden: !page.props.auth.permissions.includes('manage-role-permissions'),
     }
 ]
 const rolesColumns = [

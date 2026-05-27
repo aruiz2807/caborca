@@ -15,6 +15,7 @@ const locationsActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.locations_update_title'),
         description: useTrans('pages.settings.locations_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-location'),
     },
     {
         name: useTrans('app.delete'),

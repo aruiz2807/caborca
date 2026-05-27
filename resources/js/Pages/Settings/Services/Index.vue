@@ -43,7 +43,7 @@ const showMessage = (message, type = 'success') => {
                         <div v-if="$page.props.auth.permissions.includes('create-service-type')">
                             <Button @click="openDialog = true" >
                                 {{ $t("pages.settings.services_button_create") }}
-                            </Button>`
+                            </Button>
                         </div>
 
                         <ServicesCreateDialog />

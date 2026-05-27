@@ -15,6 +15,7 @@ const dependenciesActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.dependencies_update_title'),
         description: useTrans('pages.settings.dependencies_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-dependency'),
     },
     {
         name: useTrans('app.delete'),

@@ -38,9 +38,11 @@ const showMessage = (message) => {
                             <CardDescription class="mt-2">{{ $t("pages.settings.users_description") }}</CardDescription>
                         </div>
 
-                        <Button @click="openDialog = true" >
-                            {{ $t("pages.settings.users_button_create") }}
-                        </Button>
+                        <div v-if="$page.props.auth.permissions.includes('create-user')">
+                            <Button @click="openDialog = true" >
+                                {{ $t("pages.settings.users_button_create") }}
+                            </Button>
+                        </div>
 
                         <UsersCreateDialog />
                     </div>

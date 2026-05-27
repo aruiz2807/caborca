@@ -15,6 +15,7 @@ const workshopsActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.workshops_update_title'),
         description: useTrans('pages.settings.workshops_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-workshop'),
     },
     {
         name: useTrans('app.delete'),
