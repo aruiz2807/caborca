@@ -2,7 +2,6 @@
 import {
     Bell,
     ChevronsUpDown,
-    Braces,
     LogOut,
     CircleUserRound,
 } from 'lucide-vue-next'
@@ -71,12 +70,6 @@ const { isMobile } = useSidebar()
                             <CircleUserRound />
                             <Link :href="route('profile.show')">
                                 Profile
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem v-if="$page.props.jetstream.hasApiFeatures && $page.props.auth.roles.includes('Super-Admin')">
-                            <Braces />
-                            <Link :href="route('api-tokens.index')">
-                                API Tokens
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
