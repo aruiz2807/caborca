@@ -84,3 +84,26 @@ test('updating role permissions requires manage-role-permissions permission', fu
 
     expect($role->fresh()->hasPermissionTo('view-home-dashboard'))->toBeTrue();
 });
+
+test('updating role permissions auto-grants required view permissions', function () {
+    $user = User::factory()->create();
+    $role = Role::create([
+        'name' => 'Operador Compat',
+        'description' => 'Rol de prueba compatibilidad',
+        'guard_name' => 'web',
+    ]);
+
+    $user->givePermissionTo('manage-role-permissions');
+
+    $this->actingAs($user)
+        ->put(route('roles.update_permissions', $role->id), [
+            'permissions' => ['create-location'],
+        ])
+        ->assertRedirect(route('roles.index'));
+
+    $role = $role->fresh();
+
+    expect($role->hasPermissionTo('create-location'))->toBeTrue();
+    expect($role->hasPermissionTo('view-locations'))->toBeTrue();
+    expect($role->hasPermissionTo('view-users'))->toBeFalse();
+});

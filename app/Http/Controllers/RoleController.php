@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Services\PermissionCompatibilityService;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -93,7 +94,7 @@ class RoleController extends Controller
         return to_route('roles.index')->with('message', 'stored');
     }
 
-    public function updatePermissions(Request $request, $id)
+    public function updatePermissions(Request $request, PermissionCompatibilityService $permissionCompatibilityService, $id)
     {
         $role = Role::findOrFail($id);
 
@@ -102,7 +103,14 @@ class RoleController extends Controller
             'permissions.*' => ['exists:permissions,name']
         ])->validate();
 
-        $role->syncPermissions($request->input('permissions', []));
+        $knownPermissions = Permission::query()->pluck('name')->values()->all();
+        $requestedPermissions = $request->input('permissions', []);
+        $resolvedPermissions = $permissionCompatibilityService->expand(
+            is_array($requestedPermissions) ? $requestedPermissions : [],
+            $knownPermissions
+        );
+
+        $role->syncPermissions($resolvedPermissions);
 
         return to_route('roles.index')->with('message', 'stored');
     }

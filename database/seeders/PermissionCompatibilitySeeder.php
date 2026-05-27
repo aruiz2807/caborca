@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
+use App\Services\PermissionCompatibilityService;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -16,8 +17,11 @@ class PermissionCompatibilitySeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $knownPermissions = Permission::query()->pluck('name')->values()->all();
-        $knownPermissionsLookup = array_fill_keys($knownPermissions, true);
+        $compatibilityService = app(PermissionCompatibilityService::class);
+        $knownPermissionsLookup = array_fill_keys(
+            Permission::query()->pluck('name')->values()->all(),
+            true
+        );
         $rules = config('permission_compatibility_map.rules', []);
 
         if (! is_array($rules) || empty($rules)) {
@@ -27,57 +31,22 @@ class PermissionCompatibilitySeeder extends Seeder
         $missingPermissions = [];
 
         Role::query()->with('permissions')->chunkById(100, function ($roles) use (
-            $rules,
+            $compatibilityService,
             $knownPermissionsLookup,
             &$missingPermissions
         ): void {
             foreach ($roles as $role) {
-                $rolePermissions = $role->permissions->pluck('name')->all();
-                $rolePermissionsLookup = array_fill_keys($rolePermissions, true);
-                $permissionsToGrant = [];
+                $resolution = $compatibilityService->resolve(
+                    $role->permissions->pluck('name')->all(),
+                    $knownPermissionsLookup
+                );
 
-                foreach ($rules as $rule) {
-                    if (! is_array($rule)) {
-                        continue;
-                    }
-
-                    $ifAny = $this->normalizePermissions($rule['if_any'] ?? []);
-                    $grant = $this->normalizePermissions($rule['grant'] ?? []);
-
-                    if (empty($ifAny) || empty($grant)) {
-                        continue;
-                    }
-
-                    $hasAnyTriggerPermission = false;
-
-                    foreach ($ifAny as $permissionName) {
-                        if (isset($rolePermissionsLookup[$permissionName])) {
-                            $hasAnyTriggerPermission = true;
-                            break;
-                        }
-                    }
-
-                    if (! $hasAnyTriggerPermission) {
-                        continue;
-                    }
-
-                    foreach ($grant as $permissionName) {
-                        if (! isset($knownPermissionsLookup[$permissionName])) {
-                            $missingPermissions[$permissionName] = true;
-                            continue;
-                        }
-
-                        if (isset($rolePermissionsLookup[$permissionName])) {
-                            continue;
-                        }
-
-                        $permissionsToGrant[] = $permissionName;
-                        $rolePermissionsLookup[$permissionName] = true;
-                    }
+                foreach ($resolution['missing'] as $permissionName) {
+                    $missingPermissions[$permissionName] = true;
                 }
 
-                if (! empty($permissionsToGrant)) {
-                    $role->givePermissionTo(array_values(array_unique($permissionsToGrant)));
+                if (! empty($resolution['grants'])) {
+                    $role->givePermissionTo($resolution['grants']);
                 }
             }
         });
@@ -90,20 +59,5 @@ class PermissionCompatibilitySeeder extends Seeder
         }
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-    }
-
-    /**
-     * @param  mixed  $permissions
-     * @return array<int, string>
-     */
-    protected function normalizePermissions(mixed $permissions): array
-    {
-        if (! is_array($permissions)) {
-            return [];
-        }
-
-        return array_values(array_unique(array_filter($permissions, function ($permissionName) {
-            return is_string($permissionName) && $permissionName !== '';
-        })));
     }
 }
