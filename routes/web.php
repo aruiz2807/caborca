@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DependencyController;
 use App\Http\Controllers\BiSettingController;
+use App\Http\Controllers\BiReportController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
@@ -41,6 +42,8 @@ Route::middleware([
     Route::get('/tsplus', [TsplusController::class, 'index'])
         ->middleware('permission:view-tsplus')
         ->name('tsplus.index');
+    Route::get('/reports/{biReport}', [BiReportController::class, 'show'])
+        ->name('reports.show');
 
     Route::prefix('messages')->group(function () {
         Route::get('/', [MessageController::class, 'index'])

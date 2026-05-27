@@ -1,5 +1,6 @@
 import {
   File,
+  FolderTree,
   House,
   Mail,
   Settings2,
@@ -25,6 +26,13 @@ export const MenuItems = [
                 requiresPermission: 'view-tsplus',
             }
         ],
+    },
+    {
+        title: 'Reportes',
+        activePatterns: ['reports.*'],
+        icon: FolderTree,
+        dynamicKey: 'reportsMenuSections',
+        options: [],
     },
     {
         title: 'Ordenes',

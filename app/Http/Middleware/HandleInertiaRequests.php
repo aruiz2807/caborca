@@ -2,9 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\BiReport;
+use App\Models\BiSection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -46,6 +49,7 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
                 'unreadMessagesCount' => $request->user() ? \App\Models\Message::where('user_id', $request->user()->id)->where('status', \App\Enums\MessageStatus::NEW)->count() : 0,
             ],
+            'reportsMenuSections' => fn () => $this->buildReportsMenuSections($request),
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
                 'error' => fn () => $request->session()->get('error')
@@ -54,5 +58,59 @@ class HandleInertiaRequests extends Middleware
             'locales' => config( 'app.available_locales' ),
             'translations' => File::exists( $file ) ? File::json( $file ) : []
         ]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildReportsMenuSections(Request $request): array
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return [];
+        }
+
+        if (! Schema::hasTable('bi_sections') || ! Schema::hasTable('bi_reports')) {
+            return [];
+        }
+
+        $sections = BiSection::query()
+            ->with(['reports' => fn ($query) => $query->orderBy('name')])
+            ->orderBy('name')
+            ->get();
+
+        return $sections
+            ->map(function (BiSection $section) use ($user): ?array {
+                if (! $user->can($section->permissionName())) {
+                    return null;
+                }
+
+                $reports = $section->reports
+                    ->filter(fn (BiReport $report) => $user->can($report->permissionName()))
+                    ->map(function (BiReport $report): array {
+                        return [
+                            'title' => $report->name,
+                            'routeName' => 'reports.show',
+                            'routeParams' => [
+                                'biReport' => $report->id,
+                            ],
+                        ];
+                    })
+                    ->values()
+                    ->all();
+
+                if (empty($reports)) {
+                    return null;
+                }
+
+                return [
+                    'title' => $section->name,
+                    'options' => $reports,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 }
