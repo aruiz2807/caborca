@@ -13,16 +13,18 @@ import brands from '../../../../assets/images/brands.png'
                 <section class="order-2 lg:order-1">
                     <img class="w-full max-w-[440px]" :src="logo" alt="Caborca Automotriz" />
                     <h1 class="mt-8 text-balance text-4xl font-semibold tracking-tight text-slate-900 md:text-5xl">
-                        Plataforma de citas de servicio
+                        Portal interno de operaciones
                     </h1>
                     <p class="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-                        Accede para registrar solicitudes y dar seguimiento operativo a las órdenes de servicio.
+                        Accede para gestionar citas, órdenes, mensajería y nuevos módulos administrativos en un solo lugar.
                     </p>
-                    <img
-                        class="mt-12 hidden w-full max-w-xl opacity-80 lg:block"
-                        :src="brands"
-                        alt="Marcas"
-                    />
+                    <div class="mt-12 hidden w-full max-w-xl rounded-2xl border border-slate-700/15 bg-slate-900 px-6 py-4 shadow-lg lg:block">
+                        <img
+                            class="w-full opacity-95 brightness-110 contrast-110"
+                            :src="brands"
+                            alt="Marcas Caborca Automotriz"
+                        />
+                    </div>
                 </section>
 
                 <section class="order-1 lg:order-2">
