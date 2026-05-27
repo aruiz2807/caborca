@@ -16,7 +16,7 @@ import brands from '../../../../assets/images/brands.png'
                         Portal interno de operaciones
                     </h1>
                     <p class="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-                        Accede para gestionar citas, órdenes, mensajería y nuevos módulos administrativos en un solo lugar.
+                        Accede de forma segura al portal interno de Caborca Automotriz.
                     </p>
                     <div class="mt-12 hidden w-full max-w-xl rounded-2xl border border-slate-700/15 bg-slate-900 px-6 py-4 shadow-lg lg:block">
                         <img
