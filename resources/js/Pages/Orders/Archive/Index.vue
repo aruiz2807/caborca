@@ -18,6 +18,7 @@ import OrdersTable from "./Table.vue"
 const props = defineProps({
     orders: Array,
     dependencies: Array,
+    locations: Array,
     filters: Object,
 });
 
@@ -27,6 +28,7 @@ provide('openDialogState', openDialog);
 const form = useForm({
     status: props.filters?.status ?? '1',
     vehicle_dependency: props.filters?.vehicle_dependency ?? '1',
+    service_location: props.filters?.service_location ?? 'all',
     order_date_from: props.filters?.order_date_from ? parseDate(props.filters.order_date_from) : null,
     order_date_to: props.filters?.order_date_to ? parseDate(props.filters.order_date_to) : null,
 });
@@ -73,6 +75,7 @@ const fetchOrdersData = () => {
     const queryParams = {
         status: form.status,
         vehicle_dependency: form.vehicle_dependency,
+        service_location: form.service_location !== 'all' ? form.service_location : null,
         order_date_from: form.order_date_from ? form.order_date_from.toString() : null,
         order_date_to: form.order_date_to ? form.order_date_to.toString() : null,
     };
@@ -99,7 +102,7 @@ const fetchOrdersData = () => {
                         <CardDescription class="mt-2">{{ $t("pages.orders.archive_description") }}</CardDescription>
                     </div>
 
-                    <div class="flex items-center justify-between pt-6 pb-6">
+                    <div class="flex flex-wrap items-end gap-4 pt-6 pb-6">
                         <div class="grid gap-2">
                             <Label for="status">
                                 {{ $t("app.status") }}
@@ -129,6 +132,24 @@ const fetchOrdersData = () => {
                                 <SelectContent>
                                     <SelectItem v-for="dependency in dependencies" :key="dependency.id" :value="dependency.id.toString()">
                                         {{ dependency.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="service_location">
+                                {{ $t("app.location") }}
+                            </Label>
+
+                            <Select v-model="form.service_location">
+                                <SelectTrigger class="w-[200px]">
+                                    <SelectValue placeholder="Selecciona una ubicación" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todas las ubicaciones</SelectItem>
+                                    <SelectItem v-for="location in locations" :key="location.id" :value="location.id.toString()">
+                                        {{ location.name }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>

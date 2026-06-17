@@ -41,6 +41,20 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year}`;
 };
 
+const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+  
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes), 0);
+
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    });
+};
+
 const steps = [
     {
         step: 1,
@@ -194,7 +208,7 @@ const steps = [
                         <TabsContent value="appointment">
                             <Card>
                                 <CardContent>
-                                    <div v-if="props.record.appointment" class="grid grid-cols-4 gap-2 pt-6">
+                                    <div v-if="props.record.appointment" class="grid grid-cols-5 pt-6">
                                         <div class="grid grid-cols-2 gap-4">
                                             <div class="grid gap-2">
                                                 <Label>
@@ -220,6 +234,17 @@ const steps = [
                                         <div class="grid grid-cols-2 gap-4">
                                             <div class="grid gap-2">
                                                 <Label>
+                                                    {{ $t("app.time") }}
+                                                </Label>
+                                                <Label class="font-bold">
+                                                    {{ formatTime(props.record.appointment_time) }}
+                                                </Label>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="grid gap-2">
+                                                <Label>
                                                     {{ $t("app.workshop") }}
                                                 </Label>
                                                 <Label class="font-bold">
@@ -236,6 +261,7 @@ const steps = [
                                             </div>
                                         </div>
                                     </div>
+                                    
                                     <div v-else class="p-6 text-center text-muted-foreground">
                                         {{ $t('pages.orders.status_requested') }} - Sin cita agendada
                                     </div>

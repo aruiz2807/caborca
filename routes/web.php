@@ -80,6 +80,10 @@ Route::middleware([
             ->middleware('permission:update-order-parts')
             ->name("orders.update_parts");
 
+        Route::get('/dashboard_records', [OrderController::class, 'dashboard_records'])
+            ->middleware('permission:view-home-dashboard')
+            ->name('orders.dashboard_records');
+
         Route::get('/archive', [OrderController::class, 'archive'])
             ->middleware('permission:view-orders-archive')
             ->name('orders.archive');

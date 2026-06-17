@@ -40,6 +40,34 @@ class OrderController extends Controller
     }
 
     /*
+    Get orders for dashboard indicators dynamically
+    */
+    public function dashboard_records(Request $request)
+    {
+        $request->validate([
+            'filter' => 'required|in:all,attended,pending'
+        ]);
+
+        $currentYear = now()->year;
+        $query = Order::with(['dependency', 'serviceType', 'serviceLocation'])
+            ->whereYear('service_requested_date', $currentYear);
+
+        if ($request->filter === 'attended') {
+            $query->where('status', OrderStatus::FINISHED);
+        } elseif ($request->filter === 'pending') {
+            $query->whereIn('status', [
+                OrderStatus::REQUESTED,
+                OrderStatus::SCHEDULED,
+                OrderStatus::ENTERED
+            ]);
+        }
+
+        return response()->json([
+            'orders' => $query->get()
+        ]);
+    }
+
+    /*
     Get all active orders
     */
     public function active()
@@ -123,6 +151,10 @@ class OrderController extends Controller
             $query->where('vehicle_dependency_id', $request->vehicle_dependency);
         }
 
+        if ($request->filled('service_location')) {
+            $query->where('service_location_id', $request->service_location);
+        }
+
         if ($request->filled('order_date_from')) {
             $query->whereDate('service_requested_date', '>=', $request->order_date_from);
         }
@@ -133,11 +165,13 @@ class OrderController extends Controller
 
         $orders = $query->get();
         $dependencies = Dependency::all(['id', 'name']);
+        $locations = Location::all(['id', 'name']);
 
         return Inertia::render('Orders/Archive/Index', [
             'orders' => $orders,
             'dependencies' => $dependencies,
-            'filters' => $request->only(['status', 'vehicle_dependency', 'order_date_from', 'order_date_to']),
+            'locations' => $locations,
+            'filters' => $request->only(['status', 'vehicle_dependency', 'service_location', 'order_date_from', 'order_date_to']),
         ]);
     }
 
@@ -461,6 +495,7 @@ class OrderController extends Controller
             // Update order record in database
             $order->appointment = $appointment;
             $order->appointment_date = $request['date'];
+            $order->appointment_time = $request['time'];
             $order->appointment_workshop_id = $request['workshop'];
             $order->status = OrderStatus::SCHEDULED; //Set to SCHEDULED status
             $order->save();

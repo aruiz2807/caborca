@@ -30,6 +30,7 @@ class Order extends Model
         'service_description',
         'appointment',
         'appointment_date',
+        'appointment_time',
         'appointment_workshop_id',
         'status',
     ];
