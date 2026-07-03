@@ -80,9 +80,9 @@ const { isMobile } = useSidebar()
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem>
-                        <LogOut />
-                        <Link :href="route('logout')" method="post" as="button">
+                    <DropdownMenuItem as-child>
+                        <Link :href="route('logout')" method="post" as="button" class="flex w-full items-center gap-2">
+                            <LogOut />
                             {{ $t('app.logout') }}
                         </Link>
                     </DropdownMenuItem>
