@@ -17,14 +17,15 @@ import InputError from '@/Components/InputError.vue'
 
 const page = usePage();
 const noResults = ref(false)
+const dependency = page.props.dependency ?? null
 
 const form = useForm({
     purchase_order: '',
     economic_number: '',
     vehicle_vin: '',
     vehicle_plate: '',
-    vehicle_dependency: page.props.dependency.name,
-    vehicle_dependency_id: page.props.dependency.id,
+    vehicle_dependency: dependency?.name ?? '',
+    vehicle_dependency_id: dependency?.id ?? '',
     vehicle_taxid: '',
     vehicle_description: '',
     vehicle_model: '',
@@ -104,7 +105,7 @@ const submit = () => {
                 </Label>
                 <div class="flex w-full max-w-sm items-center space-x-2">
                     <Input v-model="form.economic_number" id="economic_number" type="text" placeholder="Numero economico de la unidad" required />
-                    <Button @click="fetchVehicleData()">
+                    <Button type="button" @click="fetchVehicleData()">
                         Buscar
                     </Button>
                 </div>

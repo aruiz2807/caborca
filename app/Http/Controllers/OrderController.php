@@ -331,6 +331,10 @@ class OrderController extends Controller
             $dependency = Dependency::select(['id', 'name', 'advisor_id'])->where('user_id', $request->user()->id)->first();
         }
 
+        if (! $dependency) {
+            return back()->with('error', 'No se encontró una dependencia asociada. Busque el vehículo para autocompletar la dependencia o asigne una al usuario.');
+        }
+
         $order = Order::create([
             'purchase_order' => $request['purchase_order'],
             'economic_number' => $request['economic_number'],
