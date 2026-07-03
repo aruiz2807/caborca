@@ -19,6 +19,9 @@ class LogoutResponse implements LogoutResponseContract
             return new JsonResponse('', 204);
         }
 
-        return redirect()->to(route('welcome', absolute: false));
+        $baseUrl = rtrim((string) $request->getBaseUrl(), '/');
+        $target = $request->getSchemeAndHttpHost().($baseUrl === '' ? '/' : $baseUrl.'/');
+
+        return redirect()->away($target);
     }
 }
