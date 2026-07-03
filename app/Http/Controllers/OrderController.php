@@ -10,7 +10,9 @@ use App\Models\Service;
 use App\Models\Workshop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -188,23 +190,38 @@ class OrderController extends Controller
     */
     public function brands()
     {
+        $cacheKey = 'orders.brands';
+        $cachedBrands = Cache::get($cacheKey, []);
+
         // GET request to external API
-        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/marcas', [
-            'base' => 'CHRCaborca_TecniHillo', //must correct, because the gob user does not have a workshop assigned
-        ]);
+        try {
+            $response = Http::connectTimeout(3)
+                ->timeout(5)
+                ->withToken(config('api.api_key'))
+                ->acceptJson()
+                ->get(config('api.api_url').'/api/dynamic/marcas', [
+                    'base' => 'CHRCaborca_TecniHillo', //must correct, because the gob user does not have a workshop assigned
+                ]);
 
-        // Check if the request was successful
-        if ($response->successful()) {
-            // Get the response body as a PHP array/object
-            $data = $response->json();
+            // Check if the request was successful
+            if ($response->successful()) {
+                // Get the response body as a PHP array/object
+                $data = $response->json();
+                $brands = data_get($data, 'data', []);
 
-            return $data['data'];
+                if (is_array($brands)) {
+                    Cache::put($cacheKey, $brands, now()->addDay());
+
+                    return $brands;
+                }
+            }
+        } catch (\Throwable $throwable) {
+            Log::warning('Unable to load brands for orders page', [
+                'message' => $throwable->getMessage(),
+            ]);
         }
-        else
-        {
-            // Handle errors
-            return null;
-        }
+
+        return $cachedBrands;
     }
 
     /*
@@ -562,15 +579,36 @@ class OrderController extends Controller
             return;
         }
 
-        // GET request to external API
-        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/cita', [
-            'base' => $order->getRelation('appointmentWorkshop')->database,
-            'cita' => $order->appointment
-        ]);
+        $cacheKey = 'orders.status-check.' . $order->id;
 
-        // Check if the request was successful
-        if ($response->successful()) {
-            $this->updateOrderFromAPI($order, $response->json());
+        if (! Cache::add($cacheKey, true, now()->addMinutes(5))) {
+            return;
+        }
+
+        try {
+            // GET request to external API
+            $response = Http::connectTimeout(3)
+                ->timeout(5)
+                ->withToken(config('api.api_key'))
+                ->acceptJson()
+                ->get(config('api.api_url').'/api/dynamic/cita', [
+                    'base' => $order->getRelation('appointmentWorkshop')->database,
+                    'cita' => $order->appointment
+                ]);
+
+            // Check if the request was successful
+            if ($response->successful()) {
+                $payload = $response->json();
+
+                if (is_array($payload)) {
+                    $this->updateOrderFromAPI($order, $payload);
+                }
+            }
+        } catch (\Throwable $throwable) {
+            Log::warning('Unable to refresh order status', [
+                'order_id' => $order->id,
+                'message' => $throwable->getMessage(),
+            ]);
         }
     }
 
