@@ -35,6 +35,7 @@ class UserController extends Controller
             'role' => ['required', 'exists:roles,name'],
             'type' => ['required', Rule::in(['A', 'G'])],
             'bpro_user' => ['required_if:type,A', 'nullable', 'string', 'max:5'],
+            'email_verified' => ['nullable', 'boolean'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
@@ -45,6 +46,10 @@ class UserController extends Controller
             'type' => $request['type'],
             'bpro_user' => $request['type'] === 'A' ? $request['bpro_user'] : null,
         ]);
+
+        $user->forceFill([
+            'email_verified_at' => $request->boolean('email_verified') ? now() : null,
+        ])->save();
 
         $user->assignRole($request['role']);
 

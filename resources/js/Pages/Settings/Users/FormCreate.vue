@@ -3,6 +3,7 @@ import { inject } from "vue"
 import { useForm, usePage } from '@inertiajs/vue3';
 import { Card, CardContent } from '@/Components/ui/card'
 import { Button } from '@/Components/ui/button'
+import { Checkbox } from '@/Components/ui/checkbox'
 import { Input } from '@/Components/ui/input'
 import { Label } from '@/Components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs'
@@ -20,18 +21,16 @@ const form = useForm({
     role: '',
     type: 'A',
     bpro_user: '',
+    email_verified: false,
 });
 
 let openDialog = inject('openDialogState')
 
 const submit = () => {
     form.post(route('users.store'), {
-        onFinish: () => {
-            form.reset('password', 'password_confirmation')
-        },
         onSuccess: () => {
             openDialog.value = false
-            form.reset('password', 'password_confirmation')
+            form.reset()
         }
     });
 };
@@ -69,6 +68,19 @@ const submit = () => {
             </Label>
             <Input v-model="form.password_confirmation" id="password_confirmation" type="password" required />
             <InputError class="mt-2" :message="form.errors.password_confirmation" />
+        </div>
+
+        <div class="flex items-start gap-3 rounded-lg border p-3">
+            <Checkbox id="email_verified" v-model="form.email_verified" />
+
+            <div class="grid gap-1 leading-none">
+                <Label for="email_verified" class="cursor-pointer">
+                    Marcar correo como verificado
+                </Label>
+                <p class="text-sm text-muted-foreground">
+                    Úsalo cuando el usuario no deba pasar por verificación por correo.
+                </p>
+            </div>
         </div>
 
         <div class="grid gap-2">
