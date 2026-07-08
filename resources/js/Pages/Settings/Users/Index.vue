@@ -13,16 +13,22 @@ import UsersCreateDialog from "./DialogCreate.vue"
 const openDialog = ref(false)
 provide('openDialogState', openDialog)
 
-const showMessage = (message) => {
-    setTimeout(() => {
-        router.visit(route('users.index'))
-    }, 1250)
+const showMessage = (message, error) => {
+    if (message) {
+        setTimeout(() => {
+            router.visit(route('users.index'))
+        }, 1250)
 
-    if(message === 'stored') {
-        toast.success(useTrans('pages.settings.users_toast_success_stored'), { duration: 1500 });
+        if(message === 'stored') {
+            toast.success(useTrans('pages.settings.users_toast_success_stored'), { duration: 1500 });
+        }
+        else if(message === 'deleted') {
+            toast.warning(useTrans('pages.settings.users_toast_success_deleted'), { duration: 1500 });
+        }
     }
-    else if(message === 'deleted') {
-        toast.warning(useTrans('pages.settings.users_toast_success_deleted'), { duration: 1500 });
+
+    if (error) {
+        toast.error(useTrans(error), { duration: 5000 });
     }
 };
 </script>
@@ -56,7 +62,7 @@ const showMessage = (message) => {
         </div>
     </UserLayout>
 
-    <div v-if="$page.props.flash.message">
-        {{ showMessage($page.props.flash.message) }}
+    <div v-if="$page.props.flash.message || $page.props.flash.error">
+        {{ showMessage($page.props.flash.message, $page.props.flash.error) }}
     </div>
 </template>

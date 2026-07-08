@@ -2,10 +2,11 @@
 import { h } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { DataTable, DataTableActionsColumn, DataTableColumnSorting } from '@/Components/data-table'
-import { Trash2, SquarePen, CircleCheck, CircleX } from 'lucide-vue-next';
+import { Trash2, SquarePen, CircleCheck, CircleX, Users } from 'lucide-vue-next';
 import { useTrans } from '/resources/js/Composables/trans';
 import UpdateForm from "./FormUpdate.vue"
 import DeleteForm from "./FormDelete.vue"
+import AdvisorsForm from "./FormAdvisors.vue"
 
 const page = usePage()
 const workshopsActions = [
@@ -15,6 +16,14 @@ const workshopsActions = [
         icon: SquarePen,
         title: useTrans('pages.settings.workshops_update_title'),
         description: useTrans('pages.settings.workshops_update_description'),
+        hidden: !page.props.auth.permissions.includes('update-workshop'),
+    },
+    {
+        name: useTrans('pages.settings.workshops_advisors_title'),
+        form: AdvisorsForm,
+        icon: Users,
+        title: useTrans('pages.settings.workshops_advisors_title'),
+        description: useTrans('pages.settings.workshops_advisors_description'),
         hidden: !page.props.auth.permissions.includes('update-workshop'),
     },
     {

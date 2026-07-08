@@ -7,8 +7,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Jetstream\Jetstream;
 use Spatie\Permission\Models\Role;
@@ -22,7 +22,7 @@ class UserController extends Controller
 
         return Inertia::render('Settings/Users/Index', [
             'users' => $users,
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
@@ -98,6 +98,10 @@ class UserController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = User::find($id);
+
+        if (\App\Models\Dependency::where('user_id', $user->id)->exists()) {
+            return back()->with('error', 'app.delete_error');
+        }
 
         $user->deleteProfilePhoto();
         $user->tokens->each->delete();

@@ -444,6 +444,8 @@
     "pages.settings.workshops_button_create": "Registrar taller",
     "pages.settings.workshops_toast_success_stored": "El taller se almaceno de forma exitosa",
     "pages.settings.workshops_toast_success_deleted": "El taller se eliminó de forma exitosa",
+    "pages.settings.workshops_advisors_title": "Asignar asesores",
+    "pages.settings.workshops_advisors_description": "Seleccione los asesores asignados a este taller.",
     "pages.settings.services_title": "Servicios",
     "pages.settings.services_description": "Catalogo de servicios",
     "pages.settings.services_update_title": "Actualizar servicio",

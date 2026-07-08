@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Status;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Workshop extends Model
@@ -47,5 +48,13 @@ class Workshop extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Get the advisors associated with the workshop.
+     */
+    public function advisors(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'workshop_user', 'workshop_id', 'user_id');
     }
 }

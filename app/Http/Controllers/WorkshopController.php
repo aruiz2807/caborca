@@ -13,12 +13,14 @@ class WorkshopController extends Controller
 {
     public function index()
     {
-        $workshops = Workshop::with('location')->get(['id', 'name', 'location_id', 'database', 'status']);
+        $workshops = Workshop::with(['location', 'advisors'])->get(['id', 'name', 'location_id', 'database', 'status']);
         $locations = Location::all(['id', 'name']);
+        $advisors = \App\Models\User::select(['id', 'name'])->where('type', 'A')->get();
 
         return Inertia::render('Settings/Workshops/Index', [
             'workshops' => $workshops,
             'locations' => $locations,
+            'advisors' => $advisors,
         ]);
     }
 
@@ -55,6 +57,19 @@ class WorkshopController extends Controller
             'database' => $request['database'],
             'status' => $request['status'],
         ]);
+
+        return to_route('workshops.index')->with('message', 'stored');
+    }
+
+    public function updateAdvisors(Request $request, $id)
+    {
+        Validator::make($request->input(), [
+            'advisors' => ['nullable', 'array'],
+            'advisors.*' => ['exists:users,id'],
+        ])->validate();
+
+        $workshop = Workshop::findOrFail($id);
+        $workshop->advisors()->sync($request->input('advisors', []));
 
         return to_route('workshops.index')->with('message', 'stored');
     }

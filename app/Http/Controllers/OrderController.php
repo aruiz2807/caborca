@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -31,7 +30,7 @@ class OrderController extends Controller
         $pendingOrders = Order::whereYear('service_requested_date', $currentYear)->whereIn('status', [
             OrderStatus::REQUESTED,
             OrderStatus::SCHEDULED,
-            OrderStatus::ENTERED
+            OrderStatus::ENTERED,
         ])->count();
 
         return Inertia::render('Home', [
@@ -47,7 +46,7 @@ class OrderController extends Controller
     public function dashboard_records(Request $request)
     {
         $request->validate([
-            'filter' => 'required|in:all,attended,pending'
+            'filter' => 'required|in:all,attended,pending',
         ]);
 
         $currentYear = now()->year;
@@ -60,12 +59,12 @@ class OrderController extends Controller
             $query->whereIn('status', [
                 OrderStatus::REQUESTED,
                 OrderStatus::SCHEDULED,
-                OrderStatus::ENTERED
+                OrderStatus::ENTERED,
             ]);
         }
 
         return response()->json([
-            'orders' => $query->get()
+            'orders' => $query->get(),
         ]);
     }
 
@@ -79,33 +78,44 @@ class OrderController extends Controller
         // Fetch orders where status is not finished
         $query = Order::with(['dependency', 'serviceType', 'serviceLocation', 'appointmentWorkshop', 'events.user'])
             ->where('status', '!=', OrderStatus::FINISHED);
-            
-        // If the current user is not an admin, filter by their assigned dependency
-        if (!$user->hasAnyRole(['Admin', 'Super-Admin'])) {
-            $query->whereHas('dependency', function ($q) use ($user) {
-                $q->where('advisor_id', $user->id)->orWhere('user_id', $user->id);
+
+        // If the current user is not an admin, filter by their assigned dependency and/or workshop location (if advisor)
+        if (! $user->hasAnyRole(['Admin', 'Super-Admin'])) {
+            $query->where(function ($subQuery) use ($user) {
+                // Keep the current filter by dependency
+                $subQuery->whereHas('dependency', function ($q) use ($user) {
+                    $q->where('advisor_id', $user->id)->orWhere('user_id', $user->id);
+                });
+
+                // Plus, if they are an advisor, also include orders in locations of their assigned workshops
+                if ($user->type === 'A') {
+                    $workshopLocationIds = Workshop::whereHas('advisors', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    })->pluck('location_id');
+
+                    if ($workshopLocationIds->isNotEmpty()) {
+                        $subQuery->orWhereIn('service_location_id', $workshopLocationIds);
+                    }
+                }
             });
         }
 
         $orders = $query->get();
-        
+
         // Filter orders that need status check (have appointment data)
-        $ordersToCheck = $orders->filter(fn($order) => 
-            $order->appointment && 
+        $ordersToCheck = $orders->filter(fn ($order) => $order->appointment &&
             $order->appointmentWorkshop
         );
 
-        if ($ordersToCheck->isNotEmpty()) 
-        {
-            foreach($ordersToCheck as $order)
-            {
-                $this->check_current_status($order);    
+        if ($ordersToCheck->isNotEmpty()) {
+            foreach ($ordersToCheck as $order) {
+                $this->check_current_status($order);
             }
-            
+
             /*
             // Concurrent requests to external API to check statuses in parallel
-            $responses = Http::pool(fn ($pool) => 
-                $ordersToCheck->map(fn ($order) => 
+            $responses = Http::pool(fn ($pool) =>
+                $ordersToCheck->map(fn ($order) =>
                     $pool->as($order->id)->withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/cita', [
                             'base' => $order->getRelation('appointmentWorkshop')->database,
                             'cita' => $order->appointment
@@ -200,7 +210,7 @@ class OrderController extends Controller
                 ->withToken(config('api.api_key'))
                 ->acceptJson()
                 ->get(config('api.api_url').'/api/dynamic/marcas', [
-                    'base' => 'CHRCaborca_TecniHillo', //must correct, because the gob user does not have a workshop assigned
+                    'base' => 'CHRCaborca_TecniHillo', // must correct, because the gob user does not have a workshop assigned
                 ]);
 
             // Check if the request was successful
@@ -235,15 +245,15 @@ class OrderController extends Controller
         $user = Auth::user()->bpro_user;
 
         $array = [
-            "fecha" => date("d/m/Y", strtotime($date)),
-            "asesor" => $user,
+            'fecha' => date('d/m/Y', strtotime($date)),
+            'asesor' => $user,
             'base' => $base,
         ];
 
         // GET request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/horarios', [
-            "fecha" => date("d/m/Y", strtotime($date)),
-            "asesor" => $user,
+            'fecha' => date('d/m/Y', strtotime($date)),
+            'asesor' => $user,
             'base' => $base,
         ]);
 
@@ -256,9 +266,7 @@ class OrderController extends Controller
             return inertia('Orders/Active/Index', [
                 'slots' => $data['data'],
             ]);
-        }
-        else
-        {
+        } else {
             // Handle errors
             return null;
         }
@@ -279,23 +287,21 @@ class OrderController extends Controller
             // Get the response body as a PHP array/object
             $data = $response->json();
 
-            //Checks if data exists, if not returns an empty array
+            // Checks if data exists, if not returns an empty array
             if (empty($data['data'])) {
                 return inertia('Orders/Active/Index', [
                     'vehicleData' => [],
                 ]);
             }
 
-            //Save client data if doesnt exist on dependencies table
+            // Save client data if doesnt exist on dependencies table
             $this->store_dependency($data['data'][0]);
 
             // Pass the data to view
             return inertia('Orders/Active/Index', [
                 'vehicleData' => $data['data'],
             ]);
-        }
-        else
-        {
+        } else {
             // Handle errors
             return back()->with('error', 'Could not retrieve data from the external API.');
         }
@@ -306,12 +312,11 @@ class OrderController extends Controller
     */
     private function store_dependency($data)
     {
-        if(!Dependency::where('customer_number', $data['idClient'])->exists())
-        {
+        if (! Dependency::where('customer_number', $data['idClient'])->exists()) {
             Dependency::create([
                 'name' => $data['client'],
                 'customer_number' => $data['idClient'],
-                'location_id' => 1, //TODO remove harcoded id
+                'location_id' => 1, // TODO remove harcoded id
                 'user_id' => Auth::id(),
             ]);
         }
@@ -322,7 +327,7 @@ class OrderController extends Controller
     */
     public function store(Request $request)
     {
-        abort_if(!$request->user()->can('create-order'), 403);
+        abort_if(! $request->user()->can('create-order'), 403);
 
         Validator::make($request->input(), [
             'purchase_order' => ['required', 'string', 'max:255'],
@@ -338,13 +343,12 @@ class OrderController extends Controller
             'service_description' => ['required'],
         ])->validate();
 
-        //check if customer number is registered on the dependencies table
+        // check if customer number is registered on the dependencies table
         $dependency = Dependency::select(['id', 'name', 'advisor_id'])->where('customer_number', $request['vehicle_dependency_id'])->first();
 
-        //if vehicle dependency is not present, search form the dependency associated to the user
-        if(!$dependency)
-        {
-            //Get the dependency associated with the user requesting the order
+        // if vehicle dependency is not present, search form the dependency associated to the user
+        if (! $dependency) {
+            // Get the dependency associated with the user requesting the order
             $dependency = Dependency::select(['id', 'name', 'advisor_id'])->where('user_id', $request->user()->id)->first();
         }
 
@@ -379,8 +383,8 @@ class OrderController extends Controller
         if ($dependency && $dependency->advisor_id) {
             \App\Facades\Message::send(
                 $dependency->advisor_id,
-                'Nueva Orden: ' . $order->purchase_order,
-                'Se ha creado una nueva orden para la dependencia ' . $dependency->name . '. No. Económico: ' . $order->economic_number . '. Por favor, revise el inventario de refacciones.'
+                'Nueva Orden: '.$order->purchase_order,
+                'Se ha creado una nueva orden para la dependencia '.$dependency->name.'. No. Económico: '.$order->economic_number.'. Por favor, revise el inventario de refacciones.'
             );
         }
 
@@ -389,12 +393,12 @@ class OrderController extends Controller
 
     public function update_parts(Request $request, $order_id)
     {
-        abort_if(!$request->user()->can('update-order-parts'), 403);
+        abort_if(! $request->user()->can('update-order-parts'), 403);
 
         $order = Order::findOrFail($order_id);
 
         $request->merge([
-            'parts_available' => filter_var($request->parts_available, FILTER_VALIDATE_BOOLEAN)
+            'parts_available' => filter_var($request->parts_available, FILTER_VALIDATE_BOOLEAN),
         ]);
 
         Validator::make($request->all(), [
@@ -408,23 +412,23 @@ class OrderController extends Controller
         if ($request->parts_available) {
             $order->status = OrderStatus::PARTS_AVAILABLE;
             \App\Facades\OrderEvent::log($order, 'Refacciones', 'Las refacciones están disponibles.');
-            
+
             if ($order->dependency && $order->dependency->advisor_id) {
                 \App\Facades\Message::send(
                     $order->dependency->advisor_id,
-                    'Refacciones disponibles para Orden: ' . $order->purchase_order,
-                    'Las refacciones para la orden ' . $order->purchase_order . ' (No. Económico: ' . $order->economic_number . ') ya se encuentran disponibles. La orden está lista para ser agendada.'
+                    'Refacciones disponibles para Orden: '.$order->purchase_order,
+                    'Las refacciones para la orden '.$order->purchase_order.' (No. Económico: '.$order->economic_number.') ya se encuentran disponibles. La orden está lista para ser agendada.'
                 );
             }
         } else {
             $formattedDate = \Carbon\Carbon::parse($request->parts_arrival_date)->format('d/m/Y');
             \App\Facades\OrderEvent::log($order, 'Refacciones', "Refacciones llegarán el {$formattedDate}");
-            
+
             if ($order->dependency && $order->dependency->user_id) {
                 \App\Facades\Message::send(
                     $order->dependency->user_id,
-                    'Refacciones para Orden: ' . $order->purchase_order,
-                    'Las refacciones para su orden ' . $order->purchase_order . ' (No. Económico: ' . $order->economic_number . ') llegarán el ' . $formattedDate . '.'
+                    'Refacciones para Orden: '.$order->purchase_order,
+                    'Las refacciones para su orden '.$order->purchase_order.' (No. Económico: '.$order->economic_number.') llegarán el '.$formattedDate.'.'
                 );
             }
         }
@@ -447,8 +451,7 @@ class OrderController extends Controller
             'service_order_workshop' => ['required'],
         ])->validate();
 
-
-        //look up for the order with the appointment number and the workshop id
+        // look up for the order with the appointment number and the workshop id
         $workshop = Workshop::where('database', $request['service_order_workshop'])->first();
 
         $order = Order::where([
@@ -456,8 +459,7 @@ class OrderController extends Controller
             ['appointment_workshop_id', $workshop->id],
         ])->first();
 
-        if($order)
-        {
+        if ($order) {
             $order->service_order = $request['service_order'];
             $order->service_order_date = $request['service_order_date'];
             $order->service_order_status = $request['service_order_status'];
@@ -465,16 +467,14 @@ class OrderController extends Controller
             $order->service_order_mileage = $request['service_order_kilometraje'];
             $order->service_order_user = $request['service_order_user'];
             $order->service_order_workshop_id = $workshop->id;
-            $order->status = OrderStatus::ENTERED; //Set to ENTERED status (received in workshop)
+            $order->status = OrderStatus::ENTERED; // Set to ENTERED status (received in workshop)
             $order->save();
 
             return response()->json([
                 'message' => 'Successful request!',
                 'info' => 'The order was updated succesfully',
             ], 200);
-        }
-        else
-        {
+        } else {
             return response()->json([
                 'message' => 'Request failed!',
                 'error' => 'The order with especified appointment number and workshop does not exist',
@@ -484,17 +484,17 @@ class OrderController extends Controller
 
     public function schedule(Request $request, $order_id)
     {
-        abort_if(!$request->user()->can('create-appointment'), 403);
+        abort_if(! $request->user()->can('create-appointment'), 403);
 
         $order = Order::find($order_id);
         $dependency = Dependency::find($order->vehicle_dependency_id);
         $workshop = Workshop::find($request['workshop']);
-        
+
         // POST request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->post(config('api.api_url').'/api/dynamic/cita', [
             'base' => $workshop->database,
             'idasesor' => $request->user()->bpro_user,
-            'fechaCita' => date("d/m/Y", strtotime($request['date'])), // $request['date'],
+            'fechaCita' => date('d/m/Y', strtotime($request['date'])), // $request['date'],
             'horaCita' => $request['time'],
             'idPersona' => $dependency->customer_number,
             'modelo' => $order->vehicle_model,
@@ -507,8 +507,7 @@ class OrderController extends Controller
         ]);
 
         // Check if the request was successful
-        if ($response->successful())
-        {
+        if ($response->successful()) {
             // Get the response body as a PHP array/object
             $response_data = $response->json();
             $appointment = $response_data['data'][0]['CIT_IDCITA'] ?? null;
@@ -518,7 +517,7 @@ class OrderController extends Controller
             $order->appointment_date = $request['date'];
             $order->appointment_time = $request['time'];
             $order->appointment_workshop_id = $request['workshop'];
-            $order->status = OrderStatus::SCHEDULED; //Set to SCHEDULED status
+            $order->status = OrderStatus::SCHEDULED; // Set to SCHEDULED status
             $order->save();
 
             \App\Facades\OrderEvent::log($order, 'Cita agendada', "Cita para el día {$request['date']} en {$workshop->name}");
@@ -534,7 +533,7 @@ class OrderController extends Controller
 
     public function cancel_appointment(Request $request, $order_id)
     {
-        abort_if(!$request->user()->can('cancel-appointment'), 403);
+        abort_if(! $request->user()->can('cancel-appointment'), 403);
 
         Validator::make($request->input(), [
             'motive' => ['required', 'string', 'max:255'],
@@ -550,8 +549,7 @@ class OrderController extends Controller
         ]);
 
         // Check if the request was successful
-        if ($response->successful())
-        {
+        if ($response->successful()) {
             // Update order record in database
             $order->appointment = null;
             $order->appointment_date = null;
@@ -575,11 +573,11 @@ class OrderController extends Controller
     */
     public function check_current_status($order)
     {
-        if (!$order || !$order->appointmentWorkshop || !$order->appointment) {
+        if (! $order || ! $order->appointmentWorkshop || ! $order->appointment) {
             return;
         }
 
-        $cacheKey = 'orders.status-check.' . $order->id;
+        $cacheKey = 'orders.status-check.'.$order->id;
 
         if (! Cache::add($cacheKey, true, now()->addMinutes(5))) {
             return;
@@ -593,7 +591,7 @@ class OrderController extends Controller
                 ->acceptJson()
                 ->get(config('api.api_url').'/api/dynamic/cita', [
                     'base' => $order->getRelation('appointmentWorkshop')->database,
-                    'cita' => $order->appointment
+                    'cita' => $order->appointment,
                 ]);
 
             // Check if the request was successful
@@ -623,8 +621,7 @@ class OrderController extends Controller
 
         $externalData = $responseData['data'][0];
 
-        if (!empty($externalData['ORDEN'])) 
-        {
+        if (! empty($externalData['ORDEN'])) {
             $order->service_order = $externalData['ORDEN'];
             $order->service_order_date = $externalData['fecha_orden']; // date("Y-m-d", strtotime($externalData['fecha_orden']));
             $order->service_order_status = $externalData['status_orden'];
@@ -632,15 +629,13 @@ class OrderController extends Controller
             $order->service_order_mileage = $externalData['kilometraje'];
             $order->service_order_user = $externalData['id_asesor'];
             $order->service_order_user_name = $externalData['asesor'];
-            
-            if ($order->status->value < OrderStatus::ENTERED->value) 
-            {
+
+            if ($order->status->value < OrderStatus::ENTERED->value) {
                 $order->status = OrderStatus::ENTERED;
             }
 
-            if ($order->service_order_status === 'CERRADA')
-            {
-                $order->status = OrderStatus::FINISHED;   
+            if ($order->service_order_status === 'CERRADA') {
+                $order->status = OrderStatus::FINISHED;
             }
 
             $order->save();

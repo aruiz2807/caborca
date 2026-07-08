@@ -196,6 +196,9 @@ Route::middleware([
         Route::put('/workshops/{workshop}', [WorkshopController::class, 'update'])
             ->middleware('permission:update-workshop')
             ->name("workshops.update");
+        Route::put('/workshops/{workshop}/advisors', [WorkshopController::class, 'updateAdvisors'])
+            ->middleware('permission:update-workshop')
+            ->name("workshops.update_advisors");
         Route::delete('/workshops/{workshop}', [WorkshopController::class, 'destroy'])
             ->middleware('permission:delete-workshop')
             ->name("workshops.destroy");
