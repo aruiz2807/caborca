@@ -61,6 +61,9 @@ Route::middleware([
         Route::get('/active', [OrderController::class, 'active'])
             ->middleware('permission:view-orders-active')
             ->name('orders.active');
+        Route::get('/brands', [OrderController::class, 'brandsData'])
+            ->middleware('permission:view-orders-active')
+            ->name('orders.brands');
         Route::get('/vehicle_data/{economic_number}', [OrderController::class, 'vehicle_data'])
             ->middleware('permission:view-orders-active')
             ->name('orders.vehicle_data');

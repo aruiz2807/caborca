@@ -1,6 +1,7 @@
 <script setup>
-import { inject, ref } from "vue"
+import { inject, ref, watch } from "vue"
 import { useForm, usePage, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { cn } from '@/lib/utils'
 import { Alert, AlertTitle, AlertDescription } from '@/Components/ui/alert'
 import { Button } from '@/Components/ui/button'
@@ -17,6 +18,8 @@ import InputError from '@/Components/InputError.vue'
 
 const page = usePage();
 const noResults = ref(false)
+const brands = ref(Array.isArray(page.props.brands) ? page.props.brands : [])
+const brandsLoading = ref(false)
 const dependency = page.props.dependency ?? null
 
 const form = useForm({
@@ -40,6 +43,29 @@ let openDialog = inject('openDialogState')
 const defaultPlaceholder = today(getLocalTimeZone())
 const df = new DateFormatter('es-MX', {
   dateStyle: 'short',
+})
+
+const loadBrands = async () => {
+    if (brandsLoading.value || brands.value.length > 0) {
+        return
+    }
+
+    brandsLoading.value = true
+
+    try {
+        const response = await axios.get(route('orders.brands'))
+        brands.value = Array.isArray(response.data.brands) ? response.data.brands : []
+    } catch (error) {
+        console.error('Error loading brands:', error)
+    } finally {
+        brandsLoading.value = false
+    }
+}
+
+watch(openDialog, (isOpen) => {
+    if (isOpen) {
+        loadBrands()
+    }
 })
 
 const fetchVehicleData = () => {
@@ -156,8 +182,11 @@ const submit = () => {
                                     <SelectValue placeholder="Selecciona una marca" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem v-for="brand in $page.props.brands" :key="brand.id" :value="brand.ID">
-                                        {{ brand.DESCRIPCION }}
+                                    <SelectItem v-if="brandsLoading" :value="''" disabled>
+                                        Cargando marcas...
+                                    </SelectItem>
+                                    <SelectItem v-for="brand in brands" :key="brand.ID ?? brand.id" :value="brand.ID ?? brand.id">
+                                        {{ brand.DESCRIPCION ?? brand.name }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>

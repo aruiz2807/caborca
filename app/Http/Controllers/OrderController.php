@@ -102,41 +102,10 @@ class OrderController extends Controller
 
         $orders = $query->get();
 
-        // Filter orders that need status check (have appointment data)
-        $ordersToCheck = $orders->filter(fn ($order) => $order->appointment &&
-            $order->appointmentWorkshop
-        );
-
-        if ($ordersToCheck->isNotEmpty()) {
-            foreach ($ordersToCheck as $order) {
-                $this->check_current_status($order);
-            }
-
-            /*
-            // Concurrent requests to external API to check statuses in parallel
-            $responses = Http::pool(fn ($pool) =>
-                $ordersToCheck->map(fn ($order) =>
-                    $pool->as($order->id)->withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/cita', [
-                            'base' => $order->getRelation('appointmentWorkshop')->database,
-                            'cita' => $order->appointment
-                        ])
-                )
-            );
-
-            // Process results and update models in the collection
-            foreach ($ordersToCheck as $order) {
-                $response = $responses[$order->id] ?? null;
-                if ($response && $response->successful()) {
-                    $this->updateOrderFromAPI($order, $response->json());
-                }
-            }
-            */
-        }
-
         $services = Service::all(['id', 'name']);
         $locations = Location::all(['id', 'name']);
         $workshops = Workshop::all(['id', 'name']);
-        $brands = $this->brands();
+        $brands = Cache::get('orders.brands', []);
 
         return Inertia::render('Orders/Active/Index', [
             'orders' => $orders,
@@ -145,6 +114,16 @@ class OrderController extends Controller
             'workshops' => $workshops,
             'brands' => $brands,
             'dependency' => $user->dependency,
+        ]);
+    }
+
+    /*
+    Get brands for the active orders form
+    */
+    public function brandsData()
+    {
+        return response()->json([
+            'brands' => $this->brands(),
         ]);
     }
 

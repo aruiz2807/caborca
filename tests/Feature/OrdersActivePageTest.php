@@ -9,12 +9,11 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
-test('the active orders page renders even when the external api is involved', function () {
+test('the active orders page renders without calling external services', function () {
     app(PermissionRegistrar::class)->forgetCachedPermissions();
 
     Permission::firstOrCreate([
@@ -70,35 +69,9 @@ test('the active orders page renders even when the external api is involved', fu
     ]);
 
     Cache::flush();
-
-    Config::set('api.api_key', 'test-token');
-    Config::set('api.api_url', 'https://api.example.test');
-
-    Http::fake([
-        '*dynamic/marcas*' => Http::response([
-            'data' => [
-                ['id' => 1, 'name' => 'Marca de prueba'],
-            ],
-        ], 200),
-        '*dynamic/cita*' => Http::response([
-            'data' => [
-                [
-                    'ORDEN' => 'OS-1001',
-                    'fecha_orden' => now()->toDateString(),
-                    'status_orden' => 'ABIERTA',
-                    'cono' => 'C-1',
-                    'kilometraje' => '1500',
-                    'id_asesor' => 'A1234',
-                    'asesor' => 'Asesor Prueba',
-                ],
-            ],
-        ], 200),
-    ]);
+    Http::preventStrayRequests();
 
     $response = $this->actingAs($user)->get(route('orders.active'));
 
     $response->assertOk();
-
-    expect(Order::first()->fresh()->status)->toBe(OrderStatus::ENTERED);
 });
-
