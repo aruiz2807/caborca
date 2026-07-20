@@ -9,11 +9,12 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
-test('the active orders page renders without calling external services', function () {
+test('the active orders page refreshes appointment status from the external api', function () {
     app(PermissionRegistrar::class)->forgetCachedPermissions();
 
     Permission::firstOrCreate([
@@ -69,9 +70,33 @@ test('the active orders page renders without calling external services', functio
     ]);
 
     Cache::flush();
-    Http::preventStrayRequests();
+    Config::set('api.api_key', 'test-token');
+    Config::set('api.api_url', 'https://api.example.test');
+
+    Http::fake([
+        'https://api.example.test/api/dynamic/cita*' => Http::response([
+            'data' => [
+                [
+                    'ORDEN' => 'OS-2001',
+                    'fecha_orden' => '2026-07-20',
+                    'status_orden' => 'CERRADA',
+                    'cono' => 'CON-01',
+                    'kilometraje' => '12345',
+                    'id_asesor' => 'ASESOR-01',
+                    'asesor' => 'Asesor Prueba',
+                ],
+            ],
+        ], 200),
+    ]);
 
     $response = $this->actingAs($user)->get(route('orders.active'));
 
     $response->assertOk();
+
+    $this->assertDatabaseHas('orders', [
+        'purchase_order' => 'PO-1001',
+        'service_order' => 'OS-2001',
+        'service_order_status' => 'CERRADA',
+        'status' => OrderStatus::FINISHED->value,
+    ]);
 });

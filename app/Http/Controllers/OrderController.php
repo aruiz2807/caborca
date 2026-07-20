@@ -102,6 +102,15 @@ class OrderController extends Controller
 
         $orders = $query->get();
 
+        // Refresh current status for orders that already have an appointment.
+        $ordersToCheck = $orders->filter(fn ($order) => $order->appointment && $order->appointmentWorkshop);
+
+        if ($ordersToCheck->isNotEmpty()) {
+            foreach ($ordersToCheck as $order) {
+                $this->check_current_status($order);
+            }
+        }
+
         $services = Service::all(['id', 'name']);
         $locations = Location::all(['id', 'name']);
         $workshops = Workshop::all(['id', 'name']);
