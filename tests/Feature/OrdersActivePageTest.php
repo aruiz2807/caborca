@@ -74,24 +74,50 @@ test('the active orders page refreshes appointment status from the external api'
     Config::set('api.api_url', 'https://api.example.test');
 
     Http::fake([
-        'https://api.example.test/api/dynamic/cita*' => Http::response([
-            'data' => [
-                [
-                    'ORDEN' => 'OS-2001',
-                    'fecha_orden' => '2026-07-20',
-                    'status_orden' => 'CERRADA',
-                    'cono' => 'CON-01',
-                    'kilometraje' => '12345',
-                    'id_asesor' => 'ASESOR-01',
-                    'asesor' => 'Asesor Prueba',
+        'https://api.example.test/api/dynamic/cita*' => Http::sequence()
+            ->push([
+                'data' => [
+                    [
+                        'ORDEN' => 'OS-2001',
+                        'fecha_orden' => '2026-07-20',
+                        'status_orden' => 'ABIERTA',
+                        'cono' => 'CON-01',
+                        'kilometraje' => '12345',
+                        'id_asesor' => 'ASESOR-01',
+                        'asesor' => 'Asesor Prueba',
+                    ],
                 ],
-            ],
-        ], 200),
+            ], 200)
+            ->push([
+                'data' => [
+                    [
+                        'ORDEN' => 'OS-2001',
+                        'fecha_orden' => '2026-07-20',
+                        'status_orden' => 'CERRADA',
+                        'cono' => 'CON-01',
+                        'kilometraje' => '12345',
+                        'id_asesor' => 'ASESOR-01',
+                        'asesor' => 'Asesor Prueba',
+                    ],
+                ],
+            ], 200),
     ]);
 
-    $response = $this->actingAs($user)->get(route('orders.active'));
+    $firstResponse = $this->actingAs($user)->get(route('orders.active'));
 
-    $response->assertOk();
+    $firstResponse->assertOk();
+
+    $this->assertDatabaseHas('orders', [
+        'purchase_order' => 'PO-1001',
+        'service_order' => 'OS-2001',
+        'service_order_status' => 'ABIERTA',
+        'status' => OrderStatus::ENTERED->value,
+    ]);
+
+    $secondResponse = $this->actingAs($user)->get(route('orders.active'));
+
+    $secondResponse->assertOk();
+    Http::assertSentCount(2);
 
     $this->assertDatabaseHas('orders', [
         'purchase_order' => 'PO-1001',

@@ -109,6 +109,8 @@ class OrderController extends Controller
             foreach ($ordersToCheck as $order) {
                 $this->check_current_status($order);
             }
+
+            $orders = $query->get();
         }
 
         $services = Service::all(['id', 'name']);
@@ -565,12 +567,6 @@ class OrderController extends Controller
             return;
         }
 
-        $cacheKey = 'orders.status-check.'.$order->id;
-
-        if (! Cache::add($cacheKey, true, now()->addMinutes(5))) {
-            return;
-        }
-
         try {
             // GET request to external API
             $response = Http::connectTimeout(3)
@@ -612,7 +608,8 @@ class OrderController extends Controller
         if (! empty($externalData['ORDEN'])) {
             $order->service_order = $externalData['ORDEN'];
             $order->service_order_date = $externalData['fecha_orden']; // date("Y-m-d", strtotime($externalData['fecha_orden']));
-            $order->service_order_status = $externalData['status_orden'];
+            $externalStatus = strtoupper(trim((string) data_get($externalData, 'status_orden', '')));
+            $order->service_order_status = $externalStatus;
             $order->service_order_cone = $externalData['cono'];
             $order->service_order_mileage = $externalData['kilometraje'];
             $order->service_order_user = $externalData['id_asesor'];
@@ -622,7 +619,7 @@ class OrderController extends Controller
                 $order->status = OrderStatus::ENTERED;
             }
 
-            if ($order->service_order_status === 'CERRADA') {
+            if (in_array($externalStatus, ['CERRADA', 'CERRADO'], true)) {
                 $order->status = OrderStatus::FINISHED;
             }
 
