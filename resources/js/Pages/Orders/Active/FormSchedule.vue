@@ -1,10 +1,10 @@
 <script setup>
-import { inject, computed, ref  } from "vue"
+import { inject, computed, ref, watch } from "vue"
 import { useForm, router } from '@inertiajs/vue3';
 import { cn } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
+import { DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date'
 import { Button } from '@/Components/ui/button'
 import { CalendarIcon } from 'lucide-vue-next'
 import { Calendar } from '@/Components/ui/calendar'
@@ -32,13 +32,27 @@ const form = useForm({
     time: '',
 });
 
+const normalizeDate = () => {
+    if (typeof form.date === 'string' && form.date !== '') {
+        form.date = parseDate(form.date)
+    }
+}
+
+watch(openDialog, (isOpen) => {
+    if (isOpen) {
+        normalizeDate()
+    }
+})
+
 const getSlots = () => {
     if (!form.workshop || !form.date) {
         return
     }
 
+    const selectedDate = typeof form.date === 'string' ? form.date : form.date.toString()
+
     // Call backend
-    router.visit(route('orders.available_slots', { workshop: form.workshop, date: form.date.toString() }), {
+    router.visit(route('orders.available_slots', { workshop: form.workshop, date: selectedDate }), {
     only: ['slots'], // Request only the 'vehicleData' prop from the server
     preserveState: true, // Keep the current form state/scroll position
         onSuccess: (page) => {
@@ -56,13 +70,10 @@ const getSlots = () => {
 }
 
 const submit = () => {
-    const date = form.date.toString()
-
-    if (date) {
-        form.date = date
-    }
-
-    form.post(route('orders.schedule', { order_id: props.record.id }), {
+    form.transform((data) => ({
+        ...data,
+        date: data.date ? data.date.toString() : '',
+    })).post(route('orders.schedule', { order_id: props.record.id }), {
         onSuccess: () => {
             openDialog.value = false
         }

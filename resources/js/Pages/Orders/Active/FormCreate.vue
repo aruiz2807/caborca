@@ -8,7 +8,7 @@ import { Button } from '@/Components/ui/button'
 import { CalendarIcon } from 'lucide-vue-next'
 import { Calendar } from '@/Components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
+import { DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date'
 import { Input } from '@/Components/ui/input'
 import { Label } from '@/Components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover'
@@ -45,6 +45,28 @@ const df = new DateFormatter('es-MX', {
   dateStyle: 'short',
 })
 
+const formatServiceDate = (value) => {
+    if (!value) {
+        return 'Fecha preferente'
+    }
+
+    if (typeof value.toDate === 'function') {
+        return df.format(value.toDate(getLocalTimeZone()))
+    }
+
+    if (typeof value === 'string') {
+        return df.format(parseDate(value).toDate(getLocalTimeZone()))
+    }
+
+    return 'Fecha preferente'
+}
+
+const normalizeServiceDate = () => {
+    if (typeof form.service_date === 'string' && form.service_date !== '') {
+        form.service_date = parseDate(form.service_date)
+    }
+}
+
 const loadBrands = async () => {
     if (brandsLoading.value || brands.value.length > 0) {
         return
@@ -65,6 +87,7 @@ const loadBrands = async () => {
 watch(openDialog, (isOpen) => {
     if (isOpen) {
         loadBrands()
+        normalizeServiceDate()
     }
 })
 
@@ -97,13 +120,12 @@ const fetchVehicleData = () => {
 };
 
 const submit = () => {
-    const date = form.service_date
-
-    if (date) {
-        form.service_date = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`
-    }
-
-    form.post(route('orders.store'), {
+    form.transform((data) => ({
+        ...data,
+        service_date: data.service_date
+            ? `${data.service_date.year}-${String(data.service_date.month).padStart(2, '0')}-${String(data.service_date.day).padStart(2, '0')}`
+            : null,
+    })).post(route('orders.store'), {
         onFinish: () => {
 
         },
@@ -283,7 +305,7 @@ const submit = () => {
                                 <PopoverTrigger as-child>
                                     <Button variant="outline" :class="cn('justify-start text-left font-normal', !form.service_date && 'text-muted-foreground')">
                                         <CalendarIcon />
-                                        {{ form.service_date ? df.format(form.service_date.toDate(getLocalTimeZone())) : "Fecha preferente" }}
+                                        {{ formatServiceDate(form.service_date) }}
                                     </Button>
                                 </PopoverTrigger>
 
