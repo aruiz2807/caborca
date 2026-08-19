@@ -7,6 +7,7 @@ use App\Models\Dependency;
 use App\Models\Location;
 use App\Models\Order;
 use App\Models\Service;
+use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -231,35 +232,70 @@ class OrderController extends Controller
     {
         $workshop = $request->query('workshop');
         $date = $request->query('date');
-        $base = Workshop::find($workshop)->database;
-        $user = Auth::user()->bpro_user;
+        $workshopModel = Workshop::with('advisors:id,bpro_user')->find($workshop);
 
-        $array = [
-            'fecha' => date('d/m/Y', strtotime($date)),
-            'asesor' => $user,
-            'base' => $base,
-        ];
+        if (! $workshopModel) {
+            return response()->json([
+                'message' => 'Workshop not found.',
+                'slots' => [],
+            ], 404);
+        }
+
+        $advisorCode = $this->resolveAdvisorCode($request->user(), $workshopModel);
+
+        if (! $advisorCode) {
+            return response()->json([
+                'message' => 'No advisor code configured for this user or workshop.',
+                'slots' => [],
+            ], 422);
+        }
 
         // GET request to external API
-        $response = Http::withToken(config('api.api_key'))->acceptJson()->get(config('api.api_url').'/api/dynamic/horarios', [
-            'fecha' => date('d/m/Y', strtotime($date)),
-            'asesor' => $user,
-            'base' => $base,
-        ]);
+        $response = Http::withToken(config('api.api_key'))
+            ->acceptJson()
+            ->withBody(json_encode([
+                'fecha' => date('d/m/Y', strtotime($date)),
+                'asesor' => $advisorCode,
+                'base' => $workshopModel->database,
+            ], JSON_THROW_ON_ERROR), 'application/json')
+            ->send('GET', config('api.api_url').'/api/dynamic/horarios');
 
         // Check if the request was successful
         if ($response->successful()) {
             // Get the response body as a PHP array/object
             $data = $response->json();
 
-            // Pass the data to view
-            return inertia('Orders/Active/Index', [
-                'slots' => $data['data'],
+            return response()->json([
+                'slots' => $data['data'] ?? [],
             ]);
         } else {
             // Handle errors
+            return response()->json([
+                'message' => 'Request failed!',
+                'error' => $response->body(),
+                'slots' => [],
+            ], $response->status());
+        }
+    }
+
+    private function resolveAdvisorCode(?User $user = null, ?Workshop $workshop = null): ?string
+    {
+        $advisorCode = trim((string) ($user?->bpro_user ?? ''));
+
+        if ($advisorCode !== '') {
+            return $advisorCode;
+        }
+
+        if (! $workshop) {
             return null;
         }
+
+        $advisorCode = trim((string) $workshop->advisors()
+            ->whereNotNull('bpro_user')
+            ->orderBy('users.id')
+            ->value('bpro_user'));
+
+        return $advisorCode !== '' ? $advisorCode : null;
     }
 
     /*
@@ -483,7 +519,7 @@ class OrderController extends Controller
         // POST request to external API
         $response = Http::withToken(config('api.api_key'))->acceptJson()->post(config('api.api_url').'/api/dynamic/cita', [
             'base' => $workshop->database,
-            'idasesor' => $request->user()->bpro_user,
+            'idasesor' => $this->resolveAdvisorCode($request->user(), $workshop),
             'fechaCita' => date('d/m/Y', strtotime($request['date'])), // $request['date'],
             'horaCita' => $request['time'],
             'idPersona' => $dependency->customer_number,

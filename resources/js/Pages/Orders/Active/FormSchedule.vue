@@ -1,6 +1,7 @@
 <script setup>
 import { inject, computed, ref, watch } from "vue"
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import { cn } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card'
@@ -19,6 +20,7 @@ const props = defineProps({
 });
 
 const noResults = ref(false)
+const slots = ref([])
 let openDialog = inject('openDialogState')
 const defaultPlaceholder = today(getLocalTimeZone())
 const df = new DateFormatter('es-MX', {
@@ -40,33 +42,32 @@ const normalizeDate = () => {
 
 watch(openDialog, (isOpen) => {
     if (isOpen) {
+        slots.value = []
+        noResults.value = false
+        form.time = ''
         normalizeDate()
     }
 })
 
 const getSlots = () => {
     if (!form.workshop || !form.date) {
+        slots.value = []
+        noResults.value = false
         return
     }
 
     const selectedDate = typeof form.date === 'string' ? form.date : form.date.toString()
 
-    // Call backend
-    router.visit(route('orders.available_slots', { workshop: form.workshop, date: selectedDate }), {
-    only: ['slots'], // Request only the 'vehicleData' prop from the server
-    preserveState: true, // Keep the current form state/scroll position
-        onSuccess: (page) => {
-            // The new 'slots' will be merged into the current page props automatically
-            const slots = page.props.slots
-
-            if (!slots || slots.length === 0) {
-                noResults.value = true
-                return
-            }
-
-            noResults.value = false
-        },
-    });
+    axios.get(route('orders.available_slots', { workshop: form.workshop, date: selectedDate }))
+        .then((response) => {
+            slots.value = Array.isArray(response.data?.slots) ? response.data.slots : []
+            noResults.value = slots.value.length === 0
+        })
+        .catch((error) => {
+            console.error('Error loading slots:', error)
+            slots.value = []
+            noResults.value = true
+        })
 }
 
 const submit = () => {
@@ -87,6 +88,13 @@ const submit = () => {
         <AlertTitle>{{ $t("pages.orders.appointment_disabled") }}</AlertTitle>
         <AlertDescription>
             {{ $t("pages.orders.appointment_disabled_description") }}
+        </AlertDescription>
+    </Alert>
+
+    <Alert v-if="noResults" variant="destructive" class="mb-4">
+        <AlertTitle>No se encontraron horarios</AlertTitle>
+        <AlertDescription>
+            Verifica que el taller tenga un asesor asignado y que la fecha tenga disponibilidad.
         </AlertDescription>
     </Alert>
 
@@ -273,7 +281,7 @@ const submit = () => {
                                     <SelectValue placeholder="Selecciona un horario" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem v-for="slot in $page.props.slots" :key="slot.CIT_HORCITA" :value="slot.CIT_HORCITA">
+                                    <SelectItem v-for="slot in slots" :key="slot.CIT_HORCITA" :value="slot.CIT_HORCITA">
                                         {{ slot.CIT_HORCITA }}
                                     </SelectItem>
                                 </SelectContent>
